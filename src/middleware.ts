@@ -1,8 +1,8 @@
+import authConfig from "@/lib/auth/auth.config";
 import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import authConfig from "./auth.config";
 
-const protectedRoutes:string[] = ["/upload,/download"];
+const protectedRoutes:string[] = [];
 const publicRoutes:string[] = ["/auth/login", "/auth/signup"];
 
 export default NextAuth(authConfig).auth((req: NextRequest) => {

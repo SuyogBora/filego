@@ -1,7 +1,7 @@
-import { auth } from "@/auth"
 import ProfileDropdown from "@/components/common/profile-dropdown"
 import ThemeToggle from "@/components/common/theme-toggle"
 import { Container } from "@/components/ui/container"
+import { auth } from "@/lib/auth/auth"
 import Link from "next/link"
 
 const Header = async () => {

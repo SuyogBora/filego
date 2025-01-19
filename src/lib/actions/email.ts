@@ -1,45 +1,14 @@
 "use server";
-import { z } from "zod";
-import { createServerAction } from "zsa";
+
 import { PasswordResetEmail } from '@/components/emails/password-reset-email';
-import { VerificationEmail } from '@/components/emails/verification-email';
 import { TransferLinkEmail } from '@/components/emails/transfer-link-email';
+import { VerificationEmail } from '@/components/emails/verification-email';
+import { resend } from '@/lib/resend';
+import { EmailResponseSchema, PasswordResetEmailSchema, TransferLinkEmailSchema, VerificationEmailSchema } from "@/lib/schema-validations/email";
 import { render } from '@react-email/components';
-import { Resend } from 'resend';
+import { createServerAction } from "zsa";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const SENDER_EMAIL = process.env.SENDER_EMAIL as string;
-
-// Schema for password reset email input
-const PasswordResetEmailSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  name: z.string().min(1, "Name is required"),
-  resetUrl: z.string().url("Invalid reset URL")
-});
-
-// Schema for verification email input
-const VerificationEmailSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  name: z.string().min(1, "Name is required"),
-  verificationUrl: z.string().url("Invalid verification URL")
-});
-
-// Schema for transfer link email input
-const TransferLinkEmailSchema = z.object({
-  senderName: z.string().min(1, "Sender name is required"),
-  recipientEmail: z.string().email("Invalid recipient email address"),
-  transferUrl: z.string().url("Invalid transfer URL"),
-  fileName: z.string().min(1, "File name is required"),
-  fileSize: z.string().optional(),
-  expiryDate: z.string().optional()
-});
-
-// Common response schema for all email actions
-const EmailResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  data: z.any().optional()
-});
 
 export const sendPasswordResetEmailAction = createServerAction()
   .input(PasswordResetEmailSchema)

@@ -1,12 +1,11 @@
-import { auth } from "@/auth";
 import FeatureCard from "@/components/pages/landing/feature-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { auth } from "@/lib/auth/auth";
 import { homeMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 import { ChartSpline, CircleChevronRight, Lock, LogIn, Mail, Send, Wallet } from "lucide-react";
 import { Metadata } from "next";
-import { headers } from "next/headers";
 import Link from "next/link";
 
 export const metadata: Metadata = homeMetadata

@@ -4,7 +4,7 @@ import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-import { SignInFormSchema } from "./lib/schema-validations/auth";
+import { SignInFormSchema } from "../schema-validations/auth";
 
 const publicRoutes = ["/auth/signin", "/auth/signup"];
 const authRoutes = ["/auth/signin", "/auth/signup"];

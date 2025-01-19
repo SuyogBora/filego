@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import TinyLoader from "@/components/common/tiny-loader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,13 +12,14 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { resetPasswordSchema } from "@/lib/schema-validations/auth";
+import { useToast } from "@/lib/hooks/use-toast";
+import { ResetPasswordFormSchema } from "@/lib/schema-validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ResetPasswordFormValue } from "@/types/auth";
 
 function ResetPasswordContent() {
     const router = useRouter();
@@ -28,33 +28,33 @@ function ResetPasswordContent() {
     const error = searchParams.get("error");
     const [isPending, setIsPending] = useState(false);
 
-    const form = useForm<z.infer<typeof resetPasswordSchema>>({
-        resolver: zodResolver(resetPasswordSchema),
+    const form = useForm<ResetPasswordFormValue>({
+        resolver: zodResolver(ResetPasswordFormSchema),
         defaultValues: {
             password: "",
             confirmPassword: "",
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
-        setIsPending(true);
-        const { error } = await authClient.resetPassword({
-            newPassword: data.password,
-        });
-        if (error) {
-            toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive",
-            });
-        } else {
-            toast({
-                title: "Success",
-                description: "Password reset successful. Login to continue.",
-            });
-            router.push("/auth/login");
-        }
-        setIsPending(false);
+    const onSubmit = async (data: ResetPasswordFormValue) => {
+        // setIsPending(true);
+        // const { error } = await authClient.resetPassword({
+        //     newPassword: data.password,
+        // });
+        // if (error) {
+        //     toast({
+        //         title: "Error",
+        //         description: error.message,
+        //         variant: "destructive",
+        //     });
+        // } else {
+        //     toast({
+        //         title: "Success",
+        //         description: "Password reset successful. Login to continue.",
+        //     });
+        //     router.push("/auth/login");
+        // }
+        // setIsPending(false);
     };
 
     if (error === "invalid_token") {

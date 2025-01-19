@@ -10,8 +10,8 @@ interface MegaFileDropzoneProps extends PropsWithChildren {
 }
 
 const MegaFileDropzone: FC<MegaFileDropzoneProps> = ({ children, className }) => {
-    const { mutationFuncs: { handleAddFiles } } = useFileUploadContext()
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: handleAddFiles, noClick: true });
+    const { mutationFuncs: { addFilesToQueue } } = useFileUploadContext()
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop: addFilesToQueue, noClick: true });
     return (
         <div
             {...getRootProps()}

@@ -1,15 +1,16 @@
 import { Button } from '@/components/ui/button'
 import { TableCell, TableRow } from '@/components/ui/table'
-import { formateFileSize, getIcon } from '@/lib/utils'
+import { formatFileSize, getIcon } from '@/lib/utils'
 import { Trash2 } from 'lucide-react'
 import { FC } from 'react'
 
 interface SelectedFilesTableRowProps {
     file: File,
-    handleRemoveFiles: (fileName: string) => void
+    onRemoveFile: (fileName: string) => void
 }
 
-const SelectedFilesTableRow: FC<SelectedFilesTableRowProps> = ({file, handleRemoveFiles}) => {
+const SelectedFilesTableRow: FC<SelectedFilesTableRowProps> = ({file, onRemoveFile}) => {
+    const {abbreviation,size} = formatFileSize(file.size)
     return (
         <TableRow className='border-border  text-start'>
             <TableCell className='text-xs border-e border-border last:border-e-0 font-medium py-1.5 px-3 h-auto w-[50%]'>
@@ -28,19 +29,17 @@ const SelectedFilesTableRow: FC<SelectedFilesTableRowProps> = ({file, handleRemo
                     </span>
                 </div>
             </TableCell>
-            
             <TableCell className='text-xs border-e border-border last:border-e-0 font-medium py-1.5 px-3 h-auto w-[15%]'>
                 <div className='truncate'>
-                    {formateFileSize(file.size)}
+                     {size}{abbreviation}
                 </div>
             </TableCell>
-            
             <TableCell className='text-xs border-e border-border last:border-e-0 font-medium py-1.5 px-3 h-auto w-[10%]'>
                 <Button 
                     variant="outline" 
                     size="icon" 
                     className='w-6 h-6'
-                    onClick={() => handleRemoveFiles(file.name)}
+                    onClick={() => onRemoveFile(file.name)}
                 >
                     <Trash2 className='!size-3 text-red-500' />
                 </Button>

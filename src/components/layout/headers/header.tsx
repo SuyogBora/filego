@@ -1,8 +1,11 @@
+import { auth } from "@/auth"
+import ProfileDropdown from "@/components/common/profile-dropdown"
 import ThemeToggle from "@/components/common/theme-toggle"
 import { Container } from "@/components/ui/container"
 import Link from "next/link"
 
-const Header = () => {
+const Header = async () => {
+    const session = await auth()
     return (
         <header className='py-2 border-b border-border fixed top-0 right-0 w-full'>
             <Container>
@@ -10,8 +13,9 @@ const Header = () => {
                     <div className="logo-part">
                         <Link href={"/"} className='text-xl font-semibold'>Filego</Link>
                     </div>
-                    <div className="">
+                    <div className="flex items-center gap-2">
                         <ThemeToggle/>
+                       {session &&  <ProfileDropdown session={session}/>}
                     </div>
                 </div>
             </Container>

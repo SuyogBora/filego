@@ -1,9 +1,7 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import TinyLoader from "@/components/common/tiny-loader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Form,
     FormControl,
@@ -13,45 +11,26 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { forgotPasswordSchema } from "@/lib/schema-validations/auth";
+import { useToast } from "@/lib/hooks/use-toast";
+import { ForgotPasswordFormSchema } from "@/lib/schema-validations/auth";
+import { ForgotPasswordFormValue } from "@/types/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 export default function ForgotPassword() {
     const { toast } = useToast();
     const [isPending, setIsPending] = useState(false);
 
-    const form = useForm<z.infer<typeof forgotPasswordSchema>>({
-        resolver: zodResolver(forgotPasswordSchema),
+    const form = useForm<ForgotPasswordFormValue>({
+        resolver: zodResolver(ForgotPasswordFormSchema),
         defaultValues: {
             email: "",
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof forgotPasswordSchema>) => {
-        setIsPending(true);
-        const { error } = await authClient.forgetPassword({
-            email: data.email,
-            redirectTo: "/reset-password",
-        });
-
-        if (error) {
-            toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive",
-            });
-        } else {
-            toast({
-                title: "Success",
-                description:
-                    "If an account exists with this email, you will receive a password reset link.",
-            });
-        }
-        setIsPending(false);
+    const onSubmit = async (data: ForgotPasswordFormValue) => {
+       
     };
 
     return (

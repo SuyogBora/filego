@@ -63,6 +63,9 @@ body {
 }
 
 @layer base {
+  .container{
+     @apply max-sm:!max-w-full
+  }
   * {
     @apply border-border;
   }

@@ -1,25 +1,25 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import TinyLoader from "@/components/common/tiny-loader";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { signUpSchema } from "@/lib/schema-validations/auth";
+import { signUpAction } from "@/lib/actions/auth";
+import { useToast } from "@/lib/hooks/use-toast";
+import { SignUpFormSchema } from "@/lib/schema-validations/auth";
+import { SignUpFormValue } from "@/types/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useServerAction } from "zsa-react";
 
 const RegisterForm = () => {
     const router = useRouter();
-    const [isPending, setIsPending] = useState(false);
     const { toast } = useToast();
+    const { isPending, execute: signUpExecute } = useServerAction(signUpAction);
 
-    const form = useForm<z.infer<typeof signUpSchema>>({
-        resolver: zodResolver(signUpSchema),
+    const form = useForm<SignUpFormValue>({
+        resolver: zodResolver(SignUpFormSchema),
         defaultValues: {
             name: "",
             email: "",
@@ -28,34 +28,22 @@ const RegisterForm = () => {
         },
     });
 
-    async function onSubmit(values: z.infer<typeof signUpSchema>) {
-        await authClient.signUp.email(
-            {
-                email: values.email,
-                password: values.password,
-                name: values.name,
-            },
-            {
-                onRequest: () => {
-                    setIsPending(true);
-                },
-                onSuccess: () => {
-                    toast({
-						title: "Account created",
-						description:
-							"Your account has been created. Check your email for a verification link.",
-					});
-                },
-                onError: (ctx) => {
-                    const errorMessage = ctx.error?.message ?? "Something went wrong during registration";
-                    toast({
-						title: "Something went wrong",
-						description: errorMessage,
-					});
-                },
-            }
-        );
-        setIsPending(false);
+    async function onSubmit(values: SignUpFormValue) {
+        const [data, error] = await signUpExecute(values);
+        if (error) {
+            toast({
+                variant: "destructive",
+                title: "Registration failed",
+                description: error.message
+            });
+            return;
+        }
+        toast({
+            title: "Registration successful",
+            description: "Please sign in with your new account",
+        });
+        form.reset();
+        router.push('/auth/login');
     }
 
     return (
@@ -65,11 +53,11 @@ const RegisterForm = () => {
                     <FormField
                         control={form.control}
                         key={field}
-                        name={field as keyof z.infer<typeof signUpSchema>}
+                        name={field as keyof SignUpFormValue}
                         render={({ field: fieldProps }) => (
                             <FormItem>
                                 <FormLabel>
-                                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')}
                                 </FormLabel>
                                 <FormControl>
                                     <Input
@@ -80,9 +68,10 @@ const RegisterForm = () => {
                                                     ? "email"
                                                     : "text"
                                         }
-                                        placeholder={`Enter your ${field}`}
+                                        placeholder={`Enter your ${field.charAt(0).toLowerCase() + field.slice(1).replace(/([A-Z])/g, ' $1').toLowerCase()}`}
                                         {...fieldProps}
                                         autoComplete="off"
+                                        disabled={isPending}
                                     />
                                 </FormControl>
                                 <FormMessage />

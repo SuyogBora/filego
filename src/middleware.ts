@@ -1,57 +1,27 @@
-import { betterFetch } from "@better-fetch/fetch";
-import { NextResponse, type NextRequest } from "next/server";
-import type { auth } from "./lib/auth/auth";
+import NextAuth from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
+import authConfig from "./auth.config";
 
-type Session = typeof auth.$Infer.Session;
+const protectedRoutes:string[] = ["/upload,/download"];
+const publicRoutes:string[] = ["/auth/login", "/auth/signup"];
 
-const AUTH_ROUTES = [
-    "/auth/login",
-    "/auth/register",
-    "/auth/forgot-password",
-    "/auth/reset-password",
-];
-
-export async function middleware(request: NextRequest) {
-    if (
-        request.nextUrl.pathname.startsWith('/_next') ||
-        request.nextUrl.pathname.startsWith('/api') ||
-        request.nextUrl.pathname.startsWith('/favicon.ico') ||
-        request.nextUrl.pathname.startsWith('/sitemap.xml') ||
-        request.nextUrl.pathname.startsWith('/robots.txt')
-    ) {
-        return NextResponse.next();
-    }
-    try {
-        const { data: session } = await betterFetch<Session>(
-            "/api/auth/get-session",
-            {
-                baseURL: request.nextUrl.origin,
-                headers: {
-                    cookie: request.headers.get("cookie") || "",
-                },
-            },
-        );
-        const isAuthPage = AUTH_ROUTES.includes(request.nextUrl.pathname);
-        const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard');
-
-        if (session && isAuthPage) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
-        if (!session && isDashboardPage) {
-            return NextResponse.redirect(new URL('/auth/login', request.url));
-        }
-        return NextResponse.next();
-
-    } catch (error) {
-        if (request.nextUrl.pathname.startsWith('/dashboard')) {
-            return NextResponse.redirect(new URL('/auth/login', request.url));
-        }
-        return NextResponse.next();
-    }
-}
+export default NextAuth(authConfig).auth((req: NextRequest) => {
+  const path = req.nextUrl.pathname;
+  const session = req.auth;
+  const isAuthenticated = !!session; 
+  const isProtectedRoute = protectedRoutes.includes(path);
+  const isPublicRoute = publicRoutes.includes(path);
+  if (isProtectedRoute && !isAuthenticated) {
+      return NextResponse.redirect(new URL("/auth/login", req.nextUrl));
+  }
+  if (isPublicRoute && isAuthenticated) {
+      return NextResponse.redirect(new URL("/", req.nextUrl));
+  }
+  return NextResponse.next();
+});
 
 export const config = {
-    matcher: [
-        '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
-    ],
-}
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)'
+  ]
+};

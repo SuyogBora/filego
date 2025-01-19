@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth/auth"
-import { AuthService } from "@/services/authService"
 import { headers } from "next/headers"
 import { createServerActionProcedure } from "zsa"
 
@@ -15,10 +14,3 @@ export const authedProcedure = createServerActionProcedure()
     }
   })
 
-export const baseProcedure = createServerActionProcedure()
-  .handler(async () => {
-    const authService = new AuthService();
-    return {
-      authService
-    }
-  })

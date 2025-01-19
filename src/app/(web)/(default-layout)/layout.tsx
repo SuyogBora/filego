@@ -1,3 +1,4 @@
+import Footer from '@/components/layout/footers/Footer'
 import Header from '@/components/layout/headers/header'
 import { FC, PropsWithChildren } from 'react'
 
@@ -9,9 +10,10 @@ const WebDefaultLayout: FC<WebDefaultLayoutProps> = ({children}) => {
   return (
      <>
        <Header/>
-       <main className='pt-[53px]'>
+       <main className='pt-[53px] min-h-[calc(100vh-53px)]'>
          {children}
        </main>
+       <Footer/>
      </>
   )
 }

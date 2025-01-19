@@ -10,13 +10,13 @@ import { getTotalFileSize } from '@/lib/utils';
 interface PrepareUploadProps {}
 
 const PrepareUpload: FC<PrepareUploadProps> = ({ }) => {
-    const { mutationFuncs: { handleAddFiles } } = useFileUploadContext();
-    const {state:{files},mutationFuncs:{handleRemoveFile}} = useFileUploadContext()
+    const { mutationFuncs: { addFilesToQueue } } = useFileUploadContext();
+    const {state:{files},mutationFuncs:{removeFileFromQueue}} = useFileUploadContext()
     return (
         <div className="mx-auto flex flex-col  text-center gap-4 md:max-w-[800px]">
-            <MiniFileDropzone handleAddFiles={handleAddFiles}/>
+            <MiniFileDropzone onAddFiles={addFilesToQueue}/>
             {files.length > 0 && <UploadActions totalFilesSize={getTotalFileSize(files)}/>}
-            <SelectedFilesTable files={files} handleRemoveFile={handleRemoveFile}/>
+            <SelectedFilesTable files={files} onRemoveFile={removeFileFromQueue}/>
         </div>
     )
 }

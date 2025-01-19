@@ -8,11 +8,10 @@ import { cn } from "@/lib/utils";
 
 interface SelectedFilesTableProps { 
     files:File[],
-    handleRemoveFile:(fileName:string)=>void
+    onRemoveFile:(fileName:string)=>void
 }
 
-
-const SelectedFilesTable: FC<SelectedFilesTableProps> = ({files,handleRemoveFile}) => {
+const SelectedFilesTable: FC<SelectedFilesTableProps> = ({files,onRemoveFile}) => {
     return (
         <>
             <div className="overflow-x-auto border border-border rounded-sm md:rounded-md">
@@ -30,7 +29,7 @@ const SelectedFilesTable: FC<SelectedFilesTableProps> = ({files,handleRemoveFile
                     <TableBody>
                         {files.length > 0 ? (
                             files.map((file: File, index: number) => (
-                               <SelectedFilesTableRow handleRemoveFiles={handleRemoveFile} key={file.name} file={file}/>
+                               <SelectedFilesTableRow onRemoveFile={onRemoveFile} key={file.name} file={file}/>
                             ))
                         ) : (
                             <TableRow>

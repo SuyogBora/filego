@@ -1,7 +1,7 @@
+import { auth } from "@/auth";
 import FeatureCard from "@/components/pages/landing/feature-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { auth } from "@/lib/auth/auth";
 import { homeMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
 import { ChartSpline, CircleChevronRight, Lock, LogIn, Mail, Send, Wallet } from "lucide-react";
@@ -39,9 +39,7 @@ const features = [
 ];
 
 export default async function Home() {
-  const session = await auth.api.getSession({
-    headers: await headers()
-  })
+  const session = await auth()
   return (
     <section className="py-4 xxs:py-6 sm:py-8 md:py-10">
       <Container>
@@ -66,10 +64,10 @@ export default async function Home() {
                   href={"/auth/login"}
                   className={cn(buttonVariants({
                     className: "min-w-[120px] xxs:min-w-[130px] sm:min-w-[140px] md:min-w-[150px] shadow-md",
-                    variant:"secondary"
+                    variant: "secondary"
                   }))}
                 >
-                 <LogIn/>  SignIn
+                SignIn   <LogIn />  
                 </Link>
               )}
               <Link

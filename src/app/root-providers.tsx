@@ -1,7 +1,8 @@
-import { ThemeProvider } from '@/components/providers/theme-provider'
-import { Toaster } from '@/components/ui/toaster'
-import { FileUploadContextProvider } from '@/lib/context/upload-context'
+
 import { FC, PropsWithChildren } from 'react'
+import { ThemeProvider } from '../components/providers/theme-provider'
+import { FileUploadContextProvider } from '../lib/context/upload-context'
+import { Toaster } from '../components/ui/toaster'
 
 interface RootProvidersProps extends PropsWithChildren{
 

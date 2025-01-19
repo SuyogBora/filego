@@ -1,4 +1,5 @@
-import { auth } from "@/lib/auth/auth"
+import LogoutButton from "@/components/pages/auth/logout-button"
+import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,18 +15,14 @@ import {
     Settings,
     User
 } from "lucide-react"
-import { headers } from "next/headers"
+import { Session } from "next-auth"
 import Image from "next/image"
 import { FC } from "react"
-import LogoutButton from "@/components/pages/auth/logout-button"
-import { Button } from "@/components/ui/button"
 
 interface ProfileDropdownProps {
+    session:Session
 }
-const ProfileDropdown: FC<ProfileDropdownProps> = async ({ }) => {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    })
+const ProfileDropdown: FC<ProfileDropdownProps> = async ({session}) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>

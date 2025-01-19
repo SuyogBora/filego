@@ -1,4 +1,5 @@
-import { object, string } from "zod";
+import { object, string, z } from "zod";
+import { baseResponseSchemaObj } from "./common";
 
 const getPasswordSchema = (type: "password" | "confirmPassword") =>
   string({ required_error: `${type} is required` })
@@ -15,7 +16,7 @@ const getNameSchema = () =>
     .min(1, "Name is required")
     .max(50, "Name must be less than 50 characters");
 
-export const signUpSchema = object({
+export const SignUpFormSchema = object({
   name: getNameSchema(),
   email: getEmailSchema(),
   password: getPasswordSchema("password"),
@@ -26,16 +27,16 @@ export const signUpSchema = object({
     path: ["confirmPassword"],
   });
 
-export const signInSchema = object({
+export const SignInFormSchema = object({
   email: getEmailSchema(),
   password: getPasswordSchema("password"),
 });
 
-export const forgotPasswordSchema = object({
+export const ForgotPasswordFormSchema = object({
   email: getEmailSchema(),
 });
 
-export const resetPasswordSchema = object({
+export const ResetPasswordFormSchema = object({
   password: getPasswordSchema("password"),
   confirmPassword: getPasswordSchema("confirmPassword"),
 })
@@ -43,3 +44,15 @@ export const resetPasswordSchema = object({
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+
+
+/// reponse schema
+
+export const SignUpResponseSchema = z.object({
+        ...baseResponseSchemaObj,
+        data:z.object({
+            name:z.string().nullable(),
+            email:z.string().nullable(),
+            id: z.string(),
+        })
+    })

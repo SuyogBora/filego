@@ -1,56 +1,46 @@
 "use client";
 
-import { authClient } from "@/lib/auth/auth-client";
 import TinyLoader from "@/components/common/tiny-loader";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { signInSchema } from "@/lib/schema-validations/auth";
+import { signInAction } from "@/lib/actions/auth";
+import { useToast } from "@/lib/hooks/use-toast";
+import { SignInFormSchema } from "@/lib/schema-validations/auth";
+import { SignInFormValue } from "@/types/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useServerAction } from "zsa-react";
 
 const LoginForm = () => {
-    const router = useRouter();
-    const [isPending, setIsPending] = useState(false);
     const { toast } = useToast();
+    const { isPending, execute: signInExecute } = useServerAction(signInAction);
 
-    const form = useForm<z.infer<typeof signInSchema>>({
-        resolver: zodResolver(signInSchema),
+    const form = useForm<SignInFormValue>({
+        resolver: zodResolver(SignInFormSchema),
         defaultValues: {
             email: "",
             password: ""
         },
     });
 
-    async function onSubmit(values: z.infer<typeof signInSchema>) {
-        await authClient.signIn.email(
-            {
-                email: values.email,
-                password: values.password,
-            },
-            {
-                onRequest: () => {
-                    setIsPending(true);
-                },
-                onSuccess: async () => {
-                    router.push("/");
-                },
-                onError: (ctx) => {
-                    const errorMessage = ctx.error?.message ?? "Something went wrong during login";
-                    toast({
-                        title: "Login failed",
-                        description: errorMessage,
-                        variant: "destructive"
-                    });
-                },
-            }
-        );
-        setIsPending(false);
+    async function onSubmit(values: SignInFormValue) {
+        const [data, error] = await signInExecute(values);
+        if (error) {
+            toast({
+                variant: "destructive",
+                title: "Login failed",
+                description: error.message
+            });
+            return;
+        }
+        toast({
+            title: "Login successful",
+            description: data.message,
+        });
+        form.reset();
+        // router.push('/'); // or wherever you want to redirect after login
     }
 
     return (
@@ -60,7 +50,7 @@ const LoginForm = () => {
                     <FormField
                         control={form.control}
                         key={field}
-                        name={field as keyof z.infer<typeof signInSchema>}
+                        name={field as keyof SignInFormValue}
                         render={({ field: fieldProps }) => (
                             <FormItem>
                                 {
@@ -73,7 +63,12 @@ const LoginForm = () => {
                                             <FormLabel>
                                                 {field.charAt(0).toUpperCase() + field.slice(1)}
                                             </FormLabel>
-                                            <Link className="text-xs font-semibold underline" href={"/auth/forgot-password"}>Forgot Password</Link>
+                                            <Link 
+                                                className="text-xs font-semibold underline" 
+                                                href={"/auth/forgot-password"}
+                                            >
+                                                Forgot Password
+                                            </Link>
                                         </div>
                                 }
                                 <FormControl>
@@ -82,6 +77,7 @@ const LoginForm = () => {
                                         placeholder={`Enter your ${field}`}
                                         {...fieldProps}
                                         autoComplete="off"
+                                        disabled={isPending}
                                     />
                                 </FormControl>
                                 <FormMessage />

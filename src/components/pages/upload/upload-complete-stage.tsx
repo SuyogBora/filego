@@ -134,15 +134,6 @@ const UploadCompleteStage: FC<UploadCompleteStageProps> = ({ transferUrl, onCanc
                 selectedColor={qrConfig.fgColor}
               />
               <Button
-                tooltip='Copy QrCode Url'
-                variant="outline"
-                size="icon"
-                className="w-8 h-8 !rounded-sm"
-                aria-label="Copy QR Code"
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-              <Button
                 tooltip='Download QrCode Image'
                 variant="secondary"
                 size="icon"

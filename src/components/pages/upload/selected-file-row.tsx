@@ -38,10 +38,10 @@ const SelectedFilesTableRow: FC<SelectedFilesTableRowProps> = ({file, onRemoveFi
                 <Button 
                     variant="outline" 
                     size="icon" 
-                    className='w-6 h-6'
+                    className='w-6 h-6  text-red-500 hover:bg-destructive hover:text-white'
                     onClick={() => onRemoveFile(file.name)}
                 >
-                    <Trash2 className='!size-3 text-red-500' />
+                    <Trash2 className='!size-3' />
                 </Button>
             </TableCell>
         </TableRow>

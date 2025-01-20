@@ -7,7 +7,7 @@ import Link from "next/link"
 const Header = async () => {
     const session = await auth()
     return (
-        <header className='py-2 border-b border-border fixed top-0 right-0 w-full'>
+        <header className='py-2 border-b border-border fixed top-0 right-0 w-full bg-background'>
             <Container>
                 <div className="header-content flex items-center justify-between">
                     <div className="logo-part">

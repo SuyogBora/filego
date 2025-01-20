@@ -84,25 +84,25 @@ function getFileCategory(type: string, fileName: string): string {
   return 'text';
 }
 
-export function getIcon(fileType: string, fileName: string = ''): JSX.Element {
+export function getIcon(fileType: string, fileName: string = '',className?:string): JSX.Element {
   const category = getFileCategory(fileType, fileName);
 
   switch (category) {
     case 'audio':
-      return <IconAudio className="size-4" />;
+      return <IconAudio className={cn("size-4",className)} />;
     case 'image':
-      return <IconImage className="size-4" />;
+      return <IconImage className={cn("size-4",className)} />;
     case 'video':
-      return <IconVideo className="size-4" />;
+      return <IconVideo className={cn("size-4",className)} />;
     case 'pdf':
-      return <IconPdf className="size-4" />;
+      return <IconPdf className={cn("size-4",className)} />;
     case 'archive':
-      return <IconZip className="size-4" />;
+      return <IconZip className={cn("size-4",className)} />;
     case 'code':
-      return <IconCode className="size-4" />;
+      return <IconCode className={cn("size-4",className)} />;
     case 'text':
     default:
-      return <IconText className="size-4" />;
+      return <IconText className={cn("size-4",className)} />;
   }
 }
 

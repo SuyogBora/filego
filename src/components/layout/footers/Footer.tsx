@@ -10,7 +10,7 @@ interface FooterProps {
 
 const Footer: FC<FooterProps> = ({ }) => {
     return (
-        <footer className='py-3 border-t border-border'>
+        <footer className='py-3 border-t border-border bg-background'>
             <Container>
                 <div className="header-content">
                     <div className="logo-part flex items-center justify-between gap-2">

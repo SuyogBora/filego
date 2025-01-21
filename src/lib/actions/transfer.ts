@@ -8,10 +8,11 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import bcryptjs from "bcryptjs";
 import { format } from "date-fns";
 import { createServerAction } from "zsa";
-import { SALT_ROUND } from "../constants";
+import { AppError } from "../error";
 import { VerifyTransferPasswordResponseSchema, VerifyTransferPasswordSchema } from "../schema-validations/download";
 import { formatFileSize, generateDownloadFileName, generateDownloadUrl } from "../utils";
 import { sendTransferLinkEmailAction } from "./email";
+import { revalidatePath } from "next/cache";
 
 export const getUploadPresignedUrlAction = createServerAction()
     .input(UploadPresignedUrlSchema).
@@ -34,6 +35,9 @@ export const getUploadPresignedUrlAction = createServerAction()
                 data: { url }
             }
         } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
             throw new Error("An internal server error occurred. Please try again later.");
         }
     });
@@ -66,19 +70,22 @@ export const getDownloadPresignedUrlAction = createServerAction()
                 data: { url },
             };
         } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
             throw new Error("An internal server error occurred. Please try again later.");
         }
     });
 
 
-    export const addTransferLogAction = createServerAction()
+export const addTransferLogAction = createServerAction()
     .input(AddTransferLogSchema)
     .output(AddTransferLogResponseSchema)
     .handler(async ({ input }) => {
         try {
             // Hash password if provided
             const hashedPassword = input.file_password
-                ? await bcryptjs.hash(input.file_password, SALT_ROUND)
+                ? await bcryptjs.hash(input.file_password, process.env.SALT_ROUND as string)
                 : null;
 
             // Create transfer log in the database
@@ -125,6 +132,7 @@ export const getDownloadPresignedUrlAction = createServerAction()
                     emailResponseMessage = `Transfer completed successfully. The transfer link has been sent via email to ${input.recipient_email}.`;
                 }
             }
+            revalidatePath("/")
             return {
                 message: emailResponseMessage,
                 success: true,
@@ -132,7 +140,10 @@ export const getDownloadPresignedUrlAction = createServerAction()
                     id: addedTransferLog.id
                 }
             };
-        } catch (error) {
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error;
+            }
             throw new Error("An internal server error occurred. Please try again later.");
         }
     });
@@ -150,7 +161,7 @@ export const verifyTransferPasswordAction = createServerAction()
                 select: { file_password: true, file_storage_key: true },
             });
             if (!transferLog) {
-                throw new Error("Transfer record not found. Please check the transfer ID.");
+                throw new AppError("Transfer record not found. Please check the transfer ID.");
             }
             if (!transferLog.file_password!) return {
                 success: true,
@@ -161,7 +172,7 @@ export const verifyTransferPasswordAction = createServerAction()
             };
             const isPasswordCorrect = await bcryptjs.compare(password, transferLog.file_password);
             if (!isPasswordCorrect) {
-                throw new Error("Incorrect password. Please try again.");
+                throw new AppError("Incorrect password. Please try again.");
             }
             return {
                 success: true,
@@ -171,6 +182,9 @@ export const verifyTransferPasswordAction = createServerAction()
                 },
             };
         } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
             throw new Error("An internal server error occurred. Please try again later.");
         }
     });

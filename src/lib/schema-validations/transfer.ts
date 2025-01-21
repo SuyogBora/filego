@@ -67,7 +67,7 @@ export const AddTransferLogResponseSchema = z.object({
 });
 
 export const UploadPresignedUrlSchema = z.object({
-    file_storage_key: z.string(),
+    file_storage_key: z.string().optional(),
     file_type: z.string(),
     user_id: z.string().optional(),
 })

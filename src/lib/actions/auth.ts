@@ -7,6 +7,7 @@ import bcryptjs from "bcryptjs";
 import { AuthError } from "next-auth";
 import { z } from "zod";
 import { createServerAction } from "zsa";
+import { AppError } from "../error";
 import { baseResponseSchemaObj } from "../schema-validations/common";
 
 export const signUpAction = createServerAction()
@@ -20,7 +21,7 @@ export const signUpAction = createServerAction()
             });
 
             if (existingUser) {
-                throw new Error("An account with this email already exists");
+                throw new AppError("An account with this email already exists");
             }
             const hashedPassword = await bcryptjs.hash(password, 10);
             const user = await prisma.user.create({
@@ -42,6 +43,9 @@ export const signUpAction = createServerAction()
                 data: user
             };
         } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
             throw new Error("An internal server error occurred. Please try again later.");
         }
     });

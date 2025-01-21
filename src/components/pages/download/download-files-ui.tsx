@@ -113,19 +113,19 @@ const DownloadTransferFilesUI: FC<DownloadTransferFilesUIProps> = ({ transferLog
                 className="hidden"
                 aria-hidden="true"
             />
-            <Card className="sm:max-w-[425px] border-border w-full">
-                <CardHeader>
+            <Card className="border-border w-full overflow-hidden">
+                <CardHeader className="py-2.5 sm:py-4 px-4 bg-secondary">
                     <CardTitle className="mb-0.5">{currentCardTitle.title}</CardTitle>
                     <CardDescription className="text-xs leading-[1.5]">
                         {currentCardTitle.description}
                     </CardDescription>
                 </CardHeader>
                 {isPasswordEnabled ? (
-                    <CardContent>
+                    <CardContent className="!py-8">
                         <Form {...form}>
                             <form
                                 onSubmit={form.handleSubmit(handlePasswordSubmit)}
-                                className="space-y-3"
+                                className="space-y-8"
                             >
                                 <FormField
                                     control={form.control}
@@ -153,19 +153,19 @@ const DownloadTransferFilesUI: FC<DownloadTransferFilesUIProps> = ({ transferLog
                     </CardContent>
                 ) : (
                     <>
-                        <CardContent>
+                        <CardContent className="py-8">
                             <div className="mb-5">
                                 <h4 className="text-sm mb-1 font-semibold">Title</h4>
                                 <p className="text-xs text-muted-foreground">
                                     {transferLog.transfer_title}
                                 </p>
                             </div>
-                            <div className="mb-5">
-                                <h4 className="text-sm mb-1 font-semibold">File Count</h4>
+                            <div className="">
+                                <h4 className="text-sm mb-1 font-semibold">Total File Count</h4>
                                 <p className="text-xs text-muted-foreground">{transferLog.total_files}</p>
                             </div>
                             {transferLog.transfer_message && (
-                                <div className="mb-5">
+                                <div className="mt-5">
                                     <h4 className="text-sm mb-1 font-semibold">Message</h4>
                                     <p className="text-xs text-muted-foreground">
                                         {transferLog.transfer_message}

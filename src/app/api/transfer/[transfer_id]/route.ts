@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { omit } from 'radash';
 import { Transfer } from '@prisma/client';
+import { omit } from 'radash';
 
 export async function GET(
   request: Request,
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const transfer_id = (await params).transfer_id;
   try {
-    const dbTransferLog = await prisma?.transfer.findFirst({
+    const dbTransferLog = await prisma.transfer.findFirst({
       where: {
         id: transfer_id,
       }
@@ -16,19 +16,19 @@ export async function GET(
 
     if (!dbTransferLog) {
       return Response.json(null, {
-        status: 404
+        status: 200
       });
     }
-    const fieldsToOmit: (keyof Transfer)[] = dbTransferLog.file_is_password_enabled 
+    const fieldsToOmit: (keyof Transfer)[] = dbTransferLog.file_is_password_enabled
       ? ['file_password', 'file_storage_key']
       : ['file_password'];
+
     const sanitizedResponse = omit(dbTransferLog, fieldsToOmit);
     return Response.json(sanitizedResponse, {
       status: 200
     });
   } catch (error) {
-    console.error('Error fetching transfer:', error);
-    return Response.json('Something Went Wrong', {
+    return Response.json('Internal Server Error', {
       status: 400
     });
   }

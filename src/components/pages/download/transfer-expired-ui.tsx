@@ -8,14 +8,14 @@ interface TransferExpiredUIProps {}
 
 const TransferExpiredUI: FC<TransferExpiredUIProps> = () => {
     return (
-        <Card className="sm:max-w-[425px] border-border w-full">
-            <CardHeader>
+        <Card className="overflow-hidden">
+            <CardHeader className='py-2.5 sm:py-4 px-4 bg-destructive'>
                 <CardTitle className="mb-1">Transfer Expired</CardTitle>
                 <CardDescription className="text-xs leading-[1.5]">
                     The link you are trying to access has expired. Please contact the sender for more details.
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className='!py-8'>
                 <p className="text-sm text-muted-foreground">
                     Transfer links are only available for a limited time. If you believe this is a mistake, reach out to the sender to confirm the status of the transfer.
                 </p>

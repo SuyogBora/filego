@@ -4,7 +4,7 @@ import { useFileUploadContext } from '@/lib/context/upload-context';
 import { getTotalFileSize } from '@/lib/utils';
 import { FC } from 'react';
 import MiniFileDropzone from './mini-dropzone';
-import SelectedFilesTable from './selected-files-table';
+import SelectedFileList from './selected-file-list';
 import UploadActions from './upload-actions';
 
 interface PrepareUploadProps {}
@@ -23,7 +23,7 @@ const PrepareUpload: FC<PrepareUploadProps> = ({ }) => {
             </div>
             <MiniFileDropzone onAddFiles={addFilesToQueue}/>
             {files.length > 0 && <UploadActions totalFilesSize={getTotalFileSize(files)}/>}
-            <SelectedFilesTable files={files} onRemoveFile={removeFileFromQueue}/>
+            <SelectedFileList files={files} onRemoveFile={removeFileFromQueue} />
         </div>
     )
 }

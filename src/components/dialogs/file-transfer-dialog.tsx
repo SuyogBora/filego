@@ -86,7 +86,7 @@ const FileTransferDialogs: FC<FileTransferDialogsProps> = ({ open, onClose, tran
     return (
         <Dialog open={open} onOpenChange={() => null}>
             <DialogContent hasCloseOption={false} className="max-w-[500px] p-0 border-border gap-0 overflow-hidden">
-                <DialogHeader className="py-4 px-4 bg-secondary">
+                <DialogHeader className="py-2.5 sm:py-4 px-4 bg-secondary">
                     <DialogTitle className="text-base">
                         {STAGE_CONFIGS[uploadStage]?.title || ""}
                     </DialogTitle>

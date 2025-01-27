@@ -32,7 +32,7 @@ const LogoutButton: FC<LogoutButtonProps> = ({ }) => {
     return (
         <Button onClick={handleLogout} className="cursor-default select-none  gap-2 rounded-sm px-2 justify-start py-1.5 h-auto text-xs outline-none transition-colors focus:bg-accent focus:text-accent-foreground w-full" variant={"ghost"}>
             {
-                isPending ? <TinyLoader /> : (
+                isPending ? <TinyLoader className="dark:text-black text-white"/> : (
                     <>
                         <LogOut />
                         <span>Log out</span>

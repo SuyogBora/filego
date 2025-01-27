@@ -20,7 +20,6 @@ export interface ITransferInfo {
   total_files: number;
   expiration_date?: Date;
   max_downloads?: number;
-  user_id?: string;
   transfer_start_time: Date,
   transfer_url?:string,
   transfer_display_name: string;

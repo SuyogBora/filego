@@ -1,18 +1,21 @@
 "use server";
 
+import { SALT_ROUND } from "@/lib/constants";
+import { AppError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { s3Client } from "@/lib/s3";
-import { AddTransferLogResponseSchema, AddTransferLogSchema, DownloadPresignedUrlSchema, PreSignedUrlResponseSchema, UploadPresignedUrlSchema } from "@/lib/schema-validations/transfer";
+import { VerifyTransferPasswordResponseSchema, VerifyTransferPasswordSchema } from "@/lib/schema-validations/download";
+import { AddTransferLogResponseSchema, AddTransferLogSchema, DownloadPresignedUrlSchema, PreSignedUrlResponseSchema, UpdateTransferMatricsSchema, UploadPresignedUrlSchema } from "@/lib/schema-validations/transfer";
+import { formatFileSize, generateDownloadFileName, generateDownloadUrl } from "@/lib/utils";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import bcryptjs from "bcryptjs";
 import { format } from "date-fns";
 import { createServerAction } from "zsa";
-import { AppError } from "../error";
-import { VerifyTransferPasswordResponseSchema, VerifyTransferPasswordSchema } from "../schema-validations/download";
-import { formatFileSize, generateDownloadFileName, generateDownloadUrl } from "../utils";
+import { auth } from "../auth/auth";
+import { authedProcedure } from "../zsa-procedure";
 import { sendTransferLinkEmailAction } from "./email";
-import { revalidatePath } from "next/cache";
+
 
 export const getUploadPresignedUrlAction = createServerAction()
     .input(UploadPresignedUrlSchema).
@@ -82,10 +85,12 @@ export const addTransferLogAction = createServerAction()
     .input(AddTransferLogSchema)
     .output(AddTransferLogResponseSchema)
     .handler(async ({ input }) => {
+        const session = await auth();
+        const user_id = session?.user.id
         try {
             // Hash password if provided
             const hashedPassword = input.file_password
-                ? await bcryptjs.hash(input.file_password, process.env.SALT_ROUND as string)
+                ? await bcryptjs.hash(input.file_password, SALT_ROUND)
                 : null;
 
             // Create transfer log in the database
@@ -104,8 +109,8 @@ export const addTransferLogAction = createServerAction()
                     total_files: input.total_files,
                     transfer_message: input.transfer_message,
                     transfer_mode: input.transfer_mode,
-                    user_id: input.user_id,
-                    transfer_display_name: input.transfer_display_name
+                    transfer_display_name: input.transfer_display_name,
+                    user_id: user_id,
                 }
             });
 
@@ -132,7 +137,6 @@ export const addTransferLogAction = createServerAction()
                     emailResponseMessage = `Transfer completed successfully. The transfer link has been sent via email to ${input.recipient_email}.`;
                 }
             }
-            revalidatePath("/")
             return {
                 message: emailResponseMessage,
                 success: true,
@@ -141,6 +145,7 @@ export const addTransferLogAction = createServerAction()
                 }
             };
         } catch (error: any) {
+            console.log(error, "error")
             if (error instanceof AppError) {
                 throw error;
             }
@@ -182,9 +187,48 @@ export const verifyTransferPasswordAction = createServerAction()
                 },
             };
         } catch (error) {
+            console.log(error, "error")
             if (error instanceof AppError) {
                 throw error;
             }
             throw new Error("An internal server error occurred. Please try again later.");
         }
     });
+
+export const updateTransferMetricsAction = authedProcedure.createServerAction()
+    .input(UpdateTransferMatricsSchema)
+    .handler(async ({ input, ctx }) => {
+        const { fileSize } = input
+        const { id } = ctx.session.user
+        try {
+            const existingTransferMetrics = await prisma.transferMetrics.findUnique({
+                where: { user_id: id }
+            })
+            const currentDate = new Date()
+            if (existingTransferMetrics) {
+                await prisma.transferMetrics.update({
+                    where: { user_id: id },
+                    data: {
+                        total_transfers_size: { increment: fileSize },
+                        total_transfers_count: { increment: 1 },
+                        last_transfer_date: currentDate,
+                        active_transfers_count: { increment: 1 }
+                    }
+                })
+            } else {
+                await prisma.transferMetrics.create({
+                    data: {
+                        user_id: id,
+                        last_transfer_date: currentDate,
+                        total_transfers_size: fileSize,
+                        total_transfers_count: 1,
+                        active_transfers_count: 1,
+                        expired_transfers_count: 0
+                    }
+                })
+            }
+        } catch (error) {
+            console.error('Error updating transfer metrics:', error)
+            // throw error 
+        }
+    })

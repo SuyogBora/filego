@@ -87,3 +87,7 @@ export const PreSignedUrlResponseSchema = z.object({
     })
 })
 
+export const UpdateTransferMatricsSchema = z.object({
+      fileSize:z.number(),
+})
+

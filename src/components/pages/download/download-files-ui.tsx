@@ -146,7 +146,7 @@ const DownloadTransferFilesUI: FC<DownloadTransferFilesUIProps> = ({ transferLog
                                     )}
                                 />
                                 <Button type="submit" className="w-full">
-                                    {isPending ? <TinyLoader /> : "Verify Password"}
+                                    {isPending ? <TinyLoader className="dark:text-black text-white"/> : "Verify Password"}
                                 </Button>
                             </form>
                         </Form>

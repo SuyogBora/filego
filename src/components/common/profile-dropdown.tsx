@@ -17,19 +17,20 @@ import {
 } from "lucide-react"
 import { Session } from "next-auth"
 import Image from "next/image"
+import Link from "next/link"
 import { FC } from "react"
 
 interface ProfileDropdownProps {
-    session:Session
+    session: Session
 }
-const ProfileDropdown: FC<ProfileDropdownProps> = async ({session}) => {
+const ProfileDropdown: FC<ProfileDropdownProps> = async ({ session }) => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button className="!ring-0 flex items-center justify-center" size={"icon"}>
-                      {
-                         session?.user.image  ?  <Image src={session?.user.image} alt="" width={40} height={40}/> : <span>{session?.user.name?.toString().slice(0,2).toUpperCase()}</span>
-                      }
+                    {
+                        session?.user.image ? <Image src={session?.user.image} alt="" width={40} height={40} /> : <span>{session?.user.name?.toString().slice(0, 2).toUpperCase()}</span>
+                    }
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 border border-border">
@@ -39,10 +40,12 @@ const ProfileDropdown: FC<ProfileDropdownProps> = async ({session}) => {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        <BriefcaseBusiness />
-                        <span>Workspace</span>
-                    </DropdownMenuItem>
+                    <Link href={"/workspace"}>
+                        <DropdownMenuItem>
+                            <BriefcaseBusiness />
+                            <span>Workspace</span>
+                        </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem>
                         <User />
                         <span>Profile</span>
@@ -64,7 +67,7 @@ const ProfileDropdown: FC<ProfileDropdownProps> = async ({session}) => {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <div className="">
-                   <LogoutButton/>
+                    <LogoutButton />
                 </div>
             </DropdownMenuContent>
         </DropdownMenu>

@@ -90,7 +90,7 @@ const LoginForm = () => {
                     className="w-full"
                     disabled={isPending}
                 >
-                    {isPending ? <TinyLoader /> : "Login"}
+                    {isPending ? <TinyLoader className="dark:text-black text-white"/> : "Login"}
                 </Button>
             </form>
         </Form>

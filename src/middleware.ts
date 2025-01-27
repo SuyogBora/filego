@@ -2,8 +2,8 @@ import authConfig from "@/lib/auth/auth.config";
 import NextAuth from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes:string[] = [];
-const publicRoutes:string[] = ["/auth/login", "/auth/signup"];
+const protectedRoutes:string[] = ["/workspace"];
+const publicRoutes:string[] = ["/auth/login", "/auth/register"];
 
 export default NextAuth(authConfig).auth((req: NextRequest) => {
   const path = req.nextUrl.pathname;

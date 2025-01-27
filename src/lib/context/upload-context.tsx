@@ -1,15 +1,15 @@
 "use client";
 
-import { addTransferLogAction, getUploadPresignedUrlAction } from "@/lib/actions/transfer";
+import { addTransferLogAction, getUploadPresignedUrlAction, updateTransferMetricsAction } from "@/lib/actions/transfer";
 import { TransferMode, UploadStage, UploadStageType } from "@/lib/constants";
 import { useToast } from "@/lib/hooks/use-toast";
 import { fileUploadReducer } from "@/lib/reducers/upload-reducers";
 import { filterFiles, generateDownloadUrl, getFileDetails } from "@/lib/utils";
 import { ITransferInfo, TransferFormValue } from "@/types/transfer";
 import { IFileUploadContextValue, IFileUploadState } from '@/types/upload';
-import axios from "axios";
-import { usePathname } from "next/navigation";
+import axios, { CancelTokenSource } from "axios";
 import { addDays } from 'date-fns';
+import { usePathname } from "next/navigation";
 import {
   createContext,
   FC,
@@ -17,10 +17,15 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useReducer
+  useReducer,
+  useRef
 } from "react";
+import { sanitizeZSAError } from "../error";
 
-// Initial state configuration for file upload process
+/**
+ * Initial state for the file upload process
+ * Includes file queue, loading states, upload stage, and transfer information
+ */
 export const initialState: IFileUploadState = {
   files: [],
   uploadStagesLoadingFlags: {
@@ -43,47 +48,55 @@ export const initialState: IFileUploadState = {
     file_type: "",
     total_files: 0,
     max_downloads: -1,
-    transfer_display_name:"",
+    transfer_display_name: "",
     transfer_start_time: new Date(),
   }
 };
 
+// Create context with type safety
 const FileUploadContext = createContext<IFileUploadContextValue | null>(null);
 
+/**
+ * Provider component for managing file upload state and operations
+ * Handles file queue, upload process, and transfer details
+ */
 export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) => {
   const { toast } = useToast();
-  const pathname = usePathname()
+  const pathname = usePathname();
   const [state, dispatch] = useReducer(fileUploadReducer, initialState);
-
-  // Resets the upload process to initial state
+  const uploadCancelTokenSourceRef = useRef<CancelTokenSource | null>(null);
+  /**
+   * State Management Functions
+   */
   const resetUploadProcess = useCallback((resetType: "deep" | "shallow") => {
+    if (uploadCancelTokenSourceRef.current && resetType === "shallow") {
+      uploadCancelTokenSourceRef.current.cancel('Upload canceled by user');
+    }
     dispatch({ type: "RESET_STATE", payload: resetType });
   }, []);
 
-  // Updates the current stage of file upload
   const updateUploadStage = useCallback((stage: UploadStageType) => {
     dispatch({ type: "CHANGE_UPLOAD_STAGE", payload: stage });
   }, []);
 
-  // Updates loading state for different upload stages
   const updateStageLoadingState = useCallback((stage: UploadStageType, isLoading: boolean) => {
     dispatch({ type: "CHANGE_UPLOAD_STAGES_LOADING_FLAG", payload: { stage, loadingFlag: isLoading } });
   }, []);
 
-  // Updates transfer information
   const updateTransferInfo = useCallback((info: ITransferInfo) => {
     dispatch({ type: "ADD_TRANSFER_DETAILS", payload: info });
   }, []);
 
-  // Updates the amount of data transferred
   const updateTransferProgress = useCallback((dataSize: number) => {
     dispatch({ type: "CHANGE_TRANSFERED_DATA_SIZE", payload: dataSize });
   }, []);
 
-  // Handles adding new files to the upload queue
+  /**
+   * File Queue Management Functions
+   */
   const addFilesToQueue = useCallback((files: File[]) => {
     const { duplicates, newFiles } = filterFiles(files, state.files);
-    
+
     if (newFiles.length > 0) {
       dispatch({ type: "ADD_FILE", payload: newFiles });
     }
@@ -97,16 +110,21 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
     }
   }, [toast, state.files]);
 
-  // Removes a file from the upload queue
   const removeFileFromQueue = useCallback((fileName: string) => {
     dispatch({ type: "REMOVE_FILE", payload: fileName });
   }, []);
 
-  // Handles the main file transfer process
+  /**
+   * Main file transfer process handler
+   * Manages the entire lifecycle of file upload from preparation to completion
+   */
   const processFileTransfer = async (formData: TransferFormValue) => {
     try {
-      // Get file details
+      // Step 1: Process file details
+      updateStageLoadingState(UploadStage.PREPARATION, true);
       const fileDetails = await getFileDetails(state.files);
+      updateStageLoadingState(UploadStage.PREPARATION, false);
+
       if (!fileDetails) {
         toast({
           title: "Error",
@@ -117,6 +135,7 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
         return;
       }
 
+      // Step 2: Prepare transfer details
       const transferDetails: ITransferInfo = {
         ...formData,
         file_extension: fileDetails.file_extension,
@@ -127,34 +146,24 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
         total_files: fileDetails.total_files,
         expiration_date: addDays(new Date(), 1),
         max_downloads: -1,
-        user_id: undefined,
         transfer_start_time: new Date(),
       };
 
-      // Update state with transfer details and progress
+      // Step 3: Initialize upload process
       updateTransferInfo(transferDetails);
       updateUploadStage(UploadStage.PROGRESS);
       updateStageLoadingState(UploadStage.PROGRESS, true);
 
-      // Get presigned URL for upload
+      // Step 4: Get upload URL
       const [presignedUrlResult, presignedUrlError] = await getUploadPresignedUrlAction({
         file_storage_key: transferDetails.file_storage_key,
-        file_type: transferDetails.file_type,
+        file_type: transferDetails.file_type
       });
+
       if (presignedUrlError) {
         toast({
           title: "Upload Error",
-          description: presignedUrlError.message || "Failed to prepare upload URL",
-          variant: "destructive"
-        });
-        resetUploadProcess("shallow");
-        return;
-      }
-
-      if (!presignedUrlResult) {
-        toast({
-          title: "Upload Error",
-          description: "Failed to generate upload URL",
+          description: sanitizeZSAError(presignedUrlError).message || "Failed to prepare upload URL",
           variant: "destructive"
         });
         resetUploadProcess("shallow");
@@ -163,9 +172,11 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
 
       updateStageLoadingState(UploadStage.PROGRESS, false);
 
-      // Upload file to storage
+      // Step 5: Upload file
+      uploadCancelTokenSourceRef.current = axios.CancelToken.source();
       const uploadResponse = await axios.put(presignedUrlResult.data.url, fileDetails.file_blob, {
-        headers: { 
+        cancelToken: uploadCancelTokenSourceRef.current.token,
+        headers: {
           "Content-Type": fileDetails.file_type,
         },
         onUploadProgress: (progressEvent) => {
@@ -175,40 +186,44 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
         },
       });
 
+      // Step 6: Process successful upload
       if (uploadResponse.status === 200) {
-        // Create transfer log with display_name
-        const [transferLogResult, transferLogError] = await addTransferLogAction(transferDetails);
-
-        if (transferLogError) {
-          toast({
-            title: "Transfer Log Error",
-            description: transferLogError.message || "Failed to save transfer details",
-            variant: "destructive"
-          });
-          resetUploadProcess("shallow");
-          return;
-        }
-
-        if (!transferLogResult) {
-          toast({
-            title: "Transfer Log Error , Please Try Again",
-            description: "Failed to create transfer",
-            variant: "destructive"
-          });
-          resetUploadProcess("shallow");
-          return;
-        }
-
-        const downloadUrl = generateDownloadUrl(transferLogResult.data.id)
-        updateTransferInfo({
-          ...transferDetails,
-          transfer_url: downloadUrl
-        });
+        // Set loading state before async operations
+        updateStageLoadingState(UploadStage.COMPLETE, true);
         updateUploadStage(UploadStage.COMPLETE);
-        toast({
-          title: transferLogResult.message,
-          variant: "default"
-        });
+
+        try {
+          const [transferLogResult, transferLogError] = await addTransferLogAction(transferDetails);
+
+          if (transferLogError) {
+            toast({
+              title: "Transfer Log Error",
+              description: sanitizeZSAError(transferLogError).message || "Failed to save transfer details",
+              variant: "destructive"
+            });
+            resetUploadProcess("shallow");
+            return;
+          }
+
+          // Step 7: Complete transfer process
+          const downloadUrl = generateDownloadUrl(transferLogResult.data.id);
+          updateTransferInfo({
+            ...transferDetails,
+            transfer_url: downloadUrl
+          });
+          updateStageLoadingState(UploadStage.COMPLETE, false);
+          toast({
+            title: transferLogResult.message,
+            variant: "default"
+          });
+
+          // Update transfer metrics
+          await updateTransferMetricsAction({
+            fileSize: transferDetails.file_size
+          });
+        } finally {
+          updateStageLoadingState(UploadStage.COMPLETE, false);
+        }
       }
     } catch (error: any) {
       toast({
@@ -220,11 +235,12 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
     }
   };
 
-  // Initialize clean state on mount
+  // Reset state when pathname changes
   useEffect(() => {
     resetUploadProcess("deep");
   }, [pathname]);
 
+  // Aggregate all upload-related actions
   const uploadActions = {
     addFilesToQueue,
     removeFileFromQueue,
@@ -240,6 +256,10 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
   );
 };
 
+/**
+ * Hook to access file upload context
+ * Must be used within FileUploadContextProvider
+ */
 export const useFileUploadContext = (): IFileUploadContextValue => {
   const context = useContext(FileUploadContext);
   if (!context) {

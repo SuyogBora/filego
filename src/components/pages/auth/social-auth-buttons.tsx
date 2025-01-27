@@ -22,25 +22,25 @@ const SocialAuthButtons: FC<SocialAuthButtonsProps> = () => {
   const { execute: socialAuthExecute } = useServerAction(socialAuthAction);
 
   const handleSocialSignIn = async (provider: Provider) => {
-      setPendingProvider(provider);
-      const [data, error] = await socialAuthExecute({ provider });
-      if (error) {
-        toast({
-          variant: "destructive",
-          title: `${provider} sign in failed`,
-          description: error.message
-        });
-        return;
-      }
+    setPendingProvider(provider);
+    const [data, error] = await socialAuthExecute({ provider });
+    if (error) {
       toast({
-        title: "Success",
-        description: data.message,
+        variant: "destructive",
+        title: `${provider} sign in failed`,
+        description: error.message
       });
+      return;
+    }
+    toast({
+      title: "Success",
+      description: data.message,
+    });
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      if (error) {
+    if (error) {
+      setTimeout(() => {
         switch (error) {
           case "OAuthSignInError":
             toast({
@@ -64,10 +64,10 @@ const SocialAuthButtons: FC<SocialAuthButtonsProps> = () => {
             });
             break;
         }
-      }
-      router.replace("/auth/login");
-    }, 50);
-  }, [error,router,toast]);
+        router.replace("/auth/login");
+      }, 50);
+    }
+  }, [error,router]);
 
 
   return (

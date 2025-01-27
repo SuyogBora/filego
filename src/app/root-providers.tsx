@@ -1,14 +1,13 @@
 
+import ReactQueryProvider from '@/components/providers/react-query-provider'
 import { FC, PropsWithChildren } from 'react'
 import { ThemeProvider } from '../components/providers/theme-provider'
-import { FileUploadContextProvider } from '../lib/context/upload-context'
 import { Toaster } from '../components/ui/toaster'
+import { FileUploadContextProvider } from '../lib/context/upload-context'
 
-interface RootProvidersProps extends PropsWithChildren{
+interface RootProvidersProps extends PropsWithChildren {}
 
-}
-
-const RootProviders: FC<RootProvidersProps> = ({ children}) => {
+const RootProviders: FC<RootProvidersProps> = ({ children }) => {
     return (
         <FileUploadContextProvider>
             <ThemeProvider
@@ -17,9 +16,11 @@ const RootProviders: FC<RootProvidersProps> = ({ children}) => {
                 enableSystem
                 disableTransitionOnChange
             >
-                {children}
+                <ReactQueryProvider>
+                    {children}
+                </ReactQueryProvider>
             </ThemeProvider>
-            <Toaster/>
+            <Toaster />
         </FileUploadContextProvider>
     )
 }

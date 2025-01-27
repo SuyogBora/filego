@@ -6,9 +6,6 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { SignInFormSchema } from "../schema-validations/auth";
 
-const publicRoutes = ["/auth/signin", "/auth/signup"];
-const authRoutes = ["/auth/signin", "/auth/signup"];
-
 export default {
     providers: [
         GoogleProvider({
@@ -78,21 +75,25 @@ export default {
         maxAge:7 * 24 * 60 * 60 // suyog writing : 7 days valid jwt
     },
     callbacks: {
-        authorized({ request: { nextUrl }, auth }) {
-            const isLoggedIn = !!auth?.user;
-            const { pathname } = nextUrl;
+        // authorized({ request: { nextUrl }, auth }) {
+        //     const isLoggedIn = !!auth?.user;
+        //     const { pathname } = nextUrl;
 
-            if (publicRoutes.includes(pathname)) {
-                return true;
-            }
-            if (authRoutes.includes(pathname)) {
-                if (isLoggedIn) {
-                    return Response.redirect(new URL('/', nextUrl));
-                }
-                return true;
-            }
+        //     if (publicRoutes.includes(pathname)) {
+        //         return true;
+        //     }
+        //     if (authRoutes.includes(pathname)) {
+        //         if (isLoggedIn) {
+        //             return Response.redirect(new URL('/', nextUrl));
+        //         }
+        //         return true;
+        //     }
 
-            return isLoggedIn;
+        //     return isLoggedIn;
+        // },
+        session({ session, token }) {
+            session.user.id = token.id;
+            return session;
         },
         jwt({ token, user, trigger, session }) {
             if (user) {
@@ -103,13 +104,8 @@ export default {
             }
             return token;
         },
-        session({ session, token }) {
-            session.user.id = token.id;
-            return session;
-        }
     },
     pages: {
         signIn: "/auth/login"
     }
-    
 } satisfies NextAuthConfig;

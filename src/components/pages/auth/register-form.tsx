@@ -84,7 +84,7 @@ const RegisterForm = () => {
                     className="w-full"
                     disabled={isPending}
                 >
-                    {isPending ? <TinyLoader /> : "Register"}
+                    {isPending ? <TinyLoader className="dark:text-black text-white"/> : "Register"}
                 </Button>
             </form>
         </Form>

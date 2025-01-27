@@ -14,7 +14,7 @@ interface UploadProgressStageProps {
   transferStartTime?: Date;
 }
 
-const UploadProgressStage: React.FC<UploadProgressStageProps> = ({ 
+const UploadProgressStage: React.FC<UploadProgressStageProps> = ({
   onCancel,
   isLoading,
   transferredDataSize,
@@ -22,12 +22,12 @@ const UploadProgressStage: React.FC<UploadProgressStageProps> = ({
   transferStartTime
 }) => {
   let formattedStartTime;
-  if(transferStartTime){
-     formattedStartTime = format(transferStartTime, 'yyyy-MM-dd HH:mm:ss');
+  if (transferStartTime) {
+    formattedStartTime = format(transferStartTime, 'yyyy-MM-dd HH:mm:ss');
   }
-  const { 
-    formattedTotalSize, 
-    formattedTransferredSize, 
+  const {
+    formattedTotalSize,
+    formattedTransferredSize,
     transferredDataPercentage,
     estimatedTimeRemaining
   } = useMemo(() => {
@@ -47,9 +47,9 @@ const UploadProgressStage: React.FC<UploadProgressStageProps> = ({
         estimatedTime = `${minutes} minute${minutes > 1 ? 's' : ''}`;
       }
     }
-    return { 
-      formattedTotalSize: total, 
-      formattedTransferredSize: transferred, 
+    return {
+      formattedTotalSize: total,
+      formattedTransferredSize: transferred,
       transferredDataPercentage: percentage,
       estimatedTimeRemaining: estimatedTime
     };
@@ -57,16 +57,18 @@ const UploadProgressStage: React.FC<UploadProgressStageProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center  gap-2">
         {isLoading ? (
-          <TinyLoader />
+          <div className="flex items-center justify-center w-full h-[200px]">
+            <TinyLoader />
+          </div>
         ) : (
           <>
-            <CircularProgress 
-              percentage={transferredDataPercentage} 
-              size="xl" 
-              circleClassName="stroke-secondary" 
-              progressClassName="dark:stroke-white stroke-black" 
+            <CircularProgress
+              percentage={transferredDataPercentage}
+              size="xl"
+              circleClassName="stroke-secondary"
+              progressClassName="dark:stroke-white stroke-black"
               strokeWidth="thick"
               textClassName="font-bold"
             />
@@ -89,10 +91,10 @@ const UploadProgressStage: React.FC<UploadProgressStageProps> = ({
         )}
       </div>
       <DialogFooter>
-        <Button 
-          type="button" 
-          variant="destructive" 
-          className="w-full" 
+        <Button
+          type="button"
+          variant="destructive"
+          className="w-full"
           onClick={onCancel}
         >
           Cancel Upload

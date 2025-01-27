@@ -14,7 +14,7 @@ export const metadata: Metadata = uploadMetadata
 const UploadFilesPage: FC<UploadFilesPageProps> = ({ }) => {
     return (
         <section className=''>
-            <MegaFileDropzone className='min-h-[calc(100vh-102px)] w-full py-4 xxs:py-6 sm:py-8 md:py-10'>
+            <MegaFileDropzone className='min-h-[calc(100vh-98px)] w-full py-4 xxs:py-6 sm:py-8 md:py-10'>
                 <Container>
                    <PrepareUpload/>
                 </Container>

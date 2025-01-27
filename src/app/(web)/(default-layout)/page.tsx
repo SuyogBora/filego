@@ -1,10 +1,9 @@
 import FeatureCard from "@/components/pages/landing/feature-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { auth } from "@/lib/auth/auth";
 import { homeMetadata } from "@/lib/metadata";
 import { cn } from "@/lib/utils";
-import { ChartSpline, CircleChevronRight, Lock, LogIn, Mail, Send, Wallet } from "lucide-react";
+import { ChartSpline, CircleChevronRight, Lock, Mail, Send, Wallet } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 
@@ -38,7 +37,6 @@ const features = [
 ];
 
 export default async function Home() {
-  const session = await auth()
   return (
     <section className="py-4 xxs:py-6 sm:py-8 md:py-10">
       <Container>
@@ -56,19 +54,7 @@ export default async function Home() {
                 Transform file sharing into an opportunity. Upload your files, generate secure links, and set your price for downloads. Empower your file-sharing experience with seamless payments, detailed real-time analytics, and robust security. Whether for business or personal use, our platform ensures your content is shared efficiently and profitably.
               </p>
             </div>
-
             <div className="flex items-center gap-2 xxs:gap-3 sm:gap-4">
-              {session ? null : (
-                <Link
-                  href={"/auth/login"}
-                  className={cn(buttonVariants({
-                    className: "min-w-[120px] xxs:min-w-[130px] sm:min-w-[140px] md:min-w-[150px] shadow-md",
-                    variant: "secondary"
-                  }))}
-                >
-                SignIn   <LogIn />  
-                </Link>
-              )}
               <Link
                 href={"/upload"}
                 className={cn(buttonVariants({
@@ -79,7 +65,6 @@ export default async function Home() {
                 Transfer File Now <Send className="w-4 h-4 xxs:w-5 xxs:h-5" />
               </Link>
             </div>
-
             <div className="w-full">
               <ul className="grid grid-cols-1 gap-3 mb-4 
                 xxs:gap-4 sm:grid-cols-2 md:gap-4">

@@ -10,7 +10,7 @@ const WebDefaultLayout: FC<WebDefaultLayoutProps> = ({children}) => {
   return (
      <>
        <Header/>
-       <main className='pt-[53px] min-h-[calc(100vh-53px)]'>
+       <main className='pt-[53px] min-h-[calc(100vh-45px)]'>
          {children}
        </main>
        <Footer/>

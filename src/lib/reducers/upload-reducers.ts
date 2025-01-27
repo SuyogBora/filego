@@ -34,12 +34,12 @@ export const fileUploadReducer = (
                   return { ...initialState };
                 }
                 const preservedTransferInfo = {
-                //   file_is_password_enabled: state.transferInfo.file_is_password_enabled,
-                //   transfer_mode: state.transferInfo.transfer_mode,
-                //   transfer_title: state.transferInfo.transfer_title,
-                //   file_password: state.transferInfo.file_password,
-                //   recipient_email: state.transferInfo.recipient_email,
-                //   transfer_message: state.transferInfo.transfer_message,
+                  file_is_password_enabled: state.transferInfo.file_is_password_enabled,
+                  transfer_mode: state.transferInfo.transfer_mode,
+                  transfer_title: state.transferInfo.transfer_title,
+                  file_password: state.transferInfo.file_password,
+                  recipient_email: state.transferInfo.recipient_email,
+                  transfer_message: state.transferInfo.transfer_message,
                 };
                 return {
                   ...initialState,

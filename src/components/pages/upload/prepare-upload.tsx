@@ -1,19 +1,19 @@
 "use client";
 
 import { useFileUploadContext } from '@/lib/context/upload-context';
-import { getTotalFileSize } from '@/lib/utils';
+import { cn, getTotalFileSize } from '@/lib/utils';
 import { FC } from 'react';
 import MiniFileDropzone from './mini-dropzone';
 import SelectedFileList from './selected-file-list';
 import UploadActions from './upload-actions';
 
-interface PrepareUploadProps {}
+interface PrepareUploadProps {className?:string}
 
-const PrepareUpload: FC<PrepareUploadProps> = ({ }) => {
+const PrepareUpload: FC<PrepareUploadProps> = ({className}) => {
     const { mutationFuncs: { addFilesToQueue } } = useFileUploadContext();
     const {state:{files},mutationFuncs:{removeFileFromQueue}} = useFileUploadContext()
     return (
-        <div className="mx-auto flex flex-col text-center gap-4 md:max-w-[800px]">
+        <div className={cn("mx-auto flex flex-col text-center gap-4 md:max-w-[800px]",className)}>
             <div className="space-y-2">
                   <h3 className='font-bold text-lg'>Prepare Your File Transfer</h3>
                   <p className="text-xs md:text-sm text-muted-foreground font-medium leading-[1.8]">

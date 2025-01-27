@@ -8,22 +8,86 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
-  email         String?    @unique
-  emailVerified DateTime?
-  password     String?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  Transfer      Transfer[]
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String?          @unique
+  emailVerified   DateTime?
+  password        String?
+  image           String?
+  accounts        Account[]
+  sessions        Session[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  transfers       Transfer[]
+  transferMetrics TransferMetrics?
+}
+
+model Transfer {
+  id                       String                   @id @default(auto()) @map("_id") @db.ObjectId
+  file_storage_key         String                   @unique
+  transfer_title           String
+  transfer_message         String?
+  transfer_display_name    String
+  transfer_mode            TransferMode             @default(MANUAL_SEND)
+  file_size                Int
+  file_type                String
+  file_extension           String
+  file_is_password_enabled Boolean                  @default(false)
+  file_password            String?
+  recipient_email          String?
+  user                     User?                    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id                  String?                  @db.ObjectId
+  total_files              Int                      @default(0)
+  max_downloads            Int?                     @default(-1)
+  expiration_date          DateTime?
+  created_at               DateTime                 @default(now())
+  updated_at               DateTime                 @updatedAt
+  download_analytics       TransferDownloadAnalytics?
+}
+
+model TransferDownloadAnalytics {
+  id                   String                   @id @default(auto()) @map("_id") @db.ObjectId
+  transfer_id          String                   @unique @db.ObjectId
+  transfer             Transfer                 @relation(fields: [transfer_id], references: [id], onDelete: Cascade)
+  total_download_count Int                      @default(0)
+  download_records     TransferDownloadRecord[]
+  created_at           DateTime                 @default(now())
+  updated_at           DateTime                 @updatedAt
+}
+
+type TransferDownloadRecord {
+  record_id               String   @default(uuid())
+  downloaded_at           DateTime @default(now())
+  ip_address              String?
+  country                 String?
+  city                    String?
+  device_type             String?
+  browser                 String?
+  authenticated_user_id   String?  @db.ObjectId
+}
+
+enum TransferMode {
+  EMAIL_SEND
+  MANUAL_SEND
+}
+
+model TransferMetrics {
+  id                      String    @id @default(auto()) @map("_id") @db.ObjectId
+  user_id                 String    @unique @db.ObjectId
+  user                    User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  total_transfers_count   Int       @default(1)
+  total_transfers_size    BigInt    @default(1)
+  active_transfers_count  Int       @default(1)
+  expired_transfers_count Int       @default(1)
+  last_transfer_date      DateTime?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
 }
 
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   type              String
   provider          String
   providerAccountId String
@@ -34,11 +98,8 @@ model Account {
   scope             String?
   id_token          String? @db.String
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([provider, providerAccountId])
 }
@@ -47,11 +108,10 @@ model Session {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   sessionToken String   @unique
   userId       String   @db.ObjectId
-  expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -72,31 +132,4 @@ model VerificationRequest {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
-}
-
-model Transfer {
-  id                       String       @id @default(auto()) @map("_id") @db.ObjectId
-  file_storage_key         String       @unique
-  transfer_title           String
-  transfer_message         String?
-  transfer_display_name    String
-  transfer_mode            TransferMode @default(MANUAL_SEND)
-  file_size                Int
-  file_type                String
-  file_extension           String
-  file_is_password_enabled Boolean      @default(false)
-  file_password            String?
-  recipient_email          String?
-  user                     User?        @relation(fields: [user_id], references: [id])
-  user_id                  String?      @db.ObjectId
-  total_files              Int          @default(0)
-  max_downloads            Int?         @default(-1)
-  expiration_date          DateTime?
-  created_at               DateTime     @default(now())
-  updated_at               DateTime     @updatedAt
-}
-
-enum TransferMode {
-  EMAIL_SEND
-  MANUAL_SEND
 }

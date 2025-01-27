@@ -1,7 +1,10 @@
 import ProfileDropdown from "@/components/common/profile-dropdown"
 import ThemeToggle from "@/components/common/theme-toggle"
+import { buttonVariants } from "@/components/ui/button"
 import { Container } from "@/components/ui/container"
 import { auth } from "@/lib/auth/auth"
+import { cn } from "@/lib/utils"
+import { LogInIcon } from "lucide-react"
 import Link from "next/link"
 
 const Header = async () => {
@@ -13,9 +16,9 @@ const Header = async () => {
                     <div className="logo-part">
                         <Link href={"/"} className='text-xl font-semibold'>Filego</Link>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <ThemeToggle/>
-                       {session &&  <ProfileDropdown session={session}/>}
+                    <div className="flex items-center gap-2 action-part">
+                       {!session ? <Link className={cn(buttonVariants({variant:"secondary",className:"gap-1"}))} href={"/auth/login"}>Login <LogInIcon/></Link> :  <ProfileDropdown session={session}/>}
+                       <ThemeToggle/>
                     </div>
                 </div>
             </Container>

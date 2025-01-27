@@ -43,7 +43,6 @@ const FileTransferDialogs: FC<FileTransferDialogsProps> = ({ open, onClose, tran
             updateUploadStage
         }
     } = useFileUploadContext();
-
     const renderStageComponent = () => {
         switch (uploadStage) {
             case UploadStage.PREPARATION:
@@ -77,6 +76,7 @@ const FileTransferDialogs: FC<FileTransferDialogsProps> = ({ open, onClose, tran
                             onClose()
                         }}
                         transferUrl={transferInfo.transfer_url}
+                        isLoading={uploadStagesLoadingFlags.COMPLETE}
                     />
                 );
             default:

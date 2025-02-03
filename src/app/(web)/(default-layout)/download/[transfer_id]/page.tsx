@@ -1,10 +1,10 @@
 // app/download/[transfer_id]/page.tsx
 import DownloadTransferFilesUI from '@/components/pages/download/download-files-ui';
 import TransferExpiredUI from '@/components/pages/download/transfer-expired-ui';
-import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Container } from '@/components/ui/container';
 import { Skeleton } from "@/components/ui/skeleton";
-import { type Transfer } from '@prisma/client';
+import { getTransferLog } from '@/lib/queries/transfer';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -13,33 +13,9 @@ export const dynamic = 'force-dynamic'
 
 // Type definitions
 interface PageProps {
-    params: {
+    params: Promise<{
         transfer_id: string;
-    };
-}
-
-/**
- * Fetches transfer data from the API
- * @param transfer_id - The unique identifier for the transfer
- * @returns Promise resolving to Transfer object or null if not found
- */
-async function getTransferLog(transfer_id: string): Promise<Transfer | null> {
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/transfer/${transfer_id}`);
-
-        // Simulated delay for testing loading states (remove in production)
-        await new Promise((res) => setTimeout(res, 5000));
-
-        if (!res.ok) {
-            if (res.status === 404) return null;
-            throw new Error(`Failed to fetch transfer: ${res.statusText}`);
-        }
-
-        return res.json();
-    } catch (error) {
-        console.error('Error fetching transfer:', error);
-        return null;
-    }
+    }>;
 }
 
 /**

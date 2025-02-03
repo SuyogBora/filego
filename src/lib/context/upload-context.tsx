@@ -21,6 +21,7 @@ import {
   useRef
 } from "react";
 import { sanitizeZSAError } from "../error";
+import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * Initial state for the file upload process
@@ -50,6 +51,7 @@ export const initialState: IFileUploadState = {
     max_downloads: -1,
     transfer_display_name: "",
     transfer_start_time: new Date(),
+    expiration_date:new Date()
   }
 };
 
@@ -65,6 +67,8 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
   const pathname = usePathname();
   const [state, dispatch] = useReducer(fileUploadReducer, initialState);
   const uploadCancelTokenSourceRef = useRef<CancelTokenSource | null>(null);
+  const queryClient = useQueryClient();
+
   /**
    * State Management Functions
    */
@@ -218,7 +222,9 @@ export const FileUploadContextProvider: FC<PropsWithChildren> = ({ children }) =
           });
 
           // Update transfer metrics
+          await queryClient.invalidateQueries({ queryKey: ['transfers'] });
           await updateTransferMetricsAction({
+            action:"fileUploaded",
             fileSize: transferDetails.file_size
           });
         } finally {

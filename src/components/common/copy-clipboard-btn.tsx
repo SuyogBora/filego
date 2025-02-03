@@ -9,9 +9,10 @@ interface ClipboardButtonProps {
     textToCopy: string;
     onCopied?: (coppiedText: string) => void;
     tooltipText?: string;
+    iconOnly?: boolean;
 }
 
-const ClipboardButton: FC<ClipboardButtonProps> = ({ textToCopy, onCopied, className,tooltipText }) => {
+const ClipboardButton: FC<ClipboardButtonProps> = ({ textToCopy, onCopied, className,tooltipText,iconOnly }) => {
     return (
         <CopyToClipboard text={textToCopy} onCopy={() => {
             if (typeof onCopied === "function") {
@@ -24,7 +25,7 @@ const ClipboardButton: FC<ClipboardButtonProps> = ({ textToCopy, onCopied, class
                 className={cn('text-xs h-auto py-1.5 px-4 gap-2 border border-secondary', className)}
                 variant="outline"
             >
-              <span> <Copy className="w-4 h-4 flex-shrink-0" /></span> Copy
+              <span> <Copy className="w-4 h-4 flex-shrink-0" /></span> {!iconOnly && "Copy"}
             </Button>
         </CopyToClipboard >
     );

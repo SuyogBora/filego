@@ -39,7 +39,7 @@ model Transfer {
   user_id                  String?                  @db.ObjectId
   total_files              Int                      @default(0)
   max_downloads            Int?                     @default(-1)
-  expiration_date          DateTime?
+  expiration_date          DateTime
   created_at               DateTime                 @default(now())
   updated_at               DateTime                 @updatedAt
   download_analytics       TransferDownloadAnalytics?

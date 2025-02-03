@@ -202,3 +202,8 @@ export const generateDownloadFileName = (fileDetails: IFileDownloadDetails): str
 export const generateDownloadUrl = (id:string)=>{
     return `${process.env.NEXT_PUBLIC_TRANSFER_URL_BASE}/${id}`
 }
+
+
+export  function stringToArray(input: string): string[] {
+  return input.split(",").map((item) => item.trim())
+}

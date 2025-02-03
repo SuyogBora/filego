@@ -103,7 +103,7 @@ export default function DynamicBreadcrumb() {
             <React.Fragment key={item.href}>
               <BreadcrumbItem>
                 {index === breadcrumbs.length - 1 ? (
-                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  <BreadcrumbPage className='text-white'>{item.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
                 )}

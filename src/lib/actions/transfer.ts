@@ -5,9 +5,9 @@ import { AppError } from "@/lib/error";
 import { prisma } from "@/lib/prisma";
 import { s3Client } from "@/lib/s3";
 import { VerifyTransferPasswordResponseSchema, VerifyTransferPasswordSchema } from "@/lib/schema-validations/download";
-import { AddTransferLogResponseSchema, AddTransferLogSchema, DownloadPresignedUrlSchema, PreSignedUrlResponseSchema, UpdateTransferMatricsSchema, UploadPresignedUrlSchema } from "@/lib/schema-validations/transfer";
+import { AddTransferLogResponseSchema, AddTransferLogSchema, DeleteTransferLogResponseSchema, DeleteTransferLogSchema, DownloadPresignedUrlSchema, PreSignedUrlResponseSchema, UpdateTransferMetricsSchema, UploadPresignedUrlSchema } from "@/lib/schema-validations/transfer";
 import { formatFileSize, generateDownloadFileName, generateDownloadUrl } from "@/lib/utils";
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import bcryptjs from "bcryptjs";
 import { format } from "date-fns";
@@ -15,6 +15,7 @@ import { createServerAction } from "zsa";
 import { auth } from "../auth/auth";
 import { authedProcedure } from "../zsa-procedure";
 import { sendTransferLinkEmailAction } from "./email";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 
 export const getUploadPresignedUrlAction = createServerAction()
@@ -137,6 +138,7 @@ export const addTransferLogAction = createServerAction()
                     emailResponseMessage = `Transfer completed successfully. The transfer link has been sent via email to ${input.recipient_email}.`;
                 }
             }
+            revalidatePath("/workspace/transfer")
             return {
                 message: emailResponseMessage,
                 success: true,
@@ -195,40 +197,120 @@ export const verifyTransferPasswordAction = createServerAction()
         }
     });
 
-export const updateTransferMetricsAction = authedProcedure.createServerAction()
-    .input(UpdateTransferMatricsSchema)
+    export const updateTransferMetricsAction = authedProcedure
+    .createServerAction()
+    .input(UpdateTransferMetricsSchema)
     .handler(async ({ input, ctx }) => {
-        const { fileSize } = input
-        const { id } = ctx.session.user
-        try {
-            const existingTransferMetrics = await prisma.transferMetrics.findUnique({
-                where: { user_id: id }
+      const { fileSize, action } = input
+      const { id: userId } = ctx.session.user
+      const currentDate = new Date()
+  
+      try {
+        const existingTransferMetrics = await prisma.transferMetrics.findUnique({
+          where: { user_id: userId },
+        })
+  
+        if (existingTransferMetrics) {
+          if (action === "fileUploaded") {
+            await prisma.transferMetrics.update({
+              where: { user_id: userId },
+              data: {
+                total_transfers_size: { increment: fileSize },
+                total_transfers_count: { increment: 1 },
+                last_transfer_date: currentDate,
+                active_transfers_count: { increment: 1 },
+              },
             })
-            const currentDate = new Date()
-            if (existingTransferMetrics) {
-                await prisma.transferMetrics.update({
-                    where: { user_id: id },
-                    data: {
-                        total_transfers_size: { increment: fileSize },
-                        total_transfers_count: { increment: 1 },
-                        last_transfer_date: currentDate,
-                        active_transfers_count: { increment: 1 }
-                    }
-                })
-            } else {
-                await prisma.transferMetrics.create({
-                    data: {
-                        user_id: id,
-                        last_transfer_date: currentDate,
-                        total_transfers_size: fileSize,
-                        total_transfers_count: 1,
-                        active_transfers_count: 1,
-                        expired_transfers_count: 0
-                    }
-                })
-            }
-        } catch (error) {
-            console.error('Error updating transfer metrics:', error)
-            // throw error 
+          } else if (action === "fileDeleted") {
+            await prisma.transferMetrics.update({
+              where: { user_id: userId },
+              data: {
+                active_transfers_count: { decrement: 1 },
+              },
+            })
+          }
+        } else if (action === "fileUploaded") {
+          await prisma.transferMetrics.create({
+            data: {
+              user_id: userId,
+              last_transfer_date: currentDate,
+              total_transfers_size: fileSize,
+              total_transfers_count: 1,
+              active_transfers_count: 1,
+              expired_transfers_count: 0,
+            },
+          })
         }
+  
+        // Revalidate the transfer-metrics tag
+        revalidateTag("transfer-metrics")
+  
+        return { success: true }
+      } catch (error) {
+        console.error("Error updating transfer metrics:", error)
+        return { success: false, error: "Failed to update transfer metrics" }
+      }
     })
+  
+export const deleteTransferLogAction = authedProcedure.createServerAction()
+    .input(DeleteTransferLogSchema)
+    .output(DeleteTransferLogResponseSchema)
+    .handler(async ({ input, ctx }) => {
+        const { id } = input;
+        const { id: userId } = ctx.session.user;
+
+        try {
+            // 1. Verify transfer exists and user has permission
+            const existingTransfer = await prisma.transfer.findUnique({
+                where: { id },
+                select: {
+                    id: true,
+                    file_storage_key: true,
+                    user_id: true
+                }
+            });
+
+            if (!existingTransfer) {
+                throw new AppError("Transfer log not found");
+            }
+
+            // Optional: Check if user owns the transfer
+            if (existingTransfer.user_id !== userId) {
+                throw new AppError("Unauthorized to delete this transfer");
+            }
+
+            // 2. Delete from S3 first (if this fails, we don't want orphaned files)
+            try {
+                await s3Client.send(new DeleteObjectCommand({
+                    Bucket: 'circulate-dev-env',
+                    Key: existingTransfer.file_storage_key
+                }));
+            } catch (s3Error) {
+                console.error('S3 deletion failed:', s3Error);
+                throw new AppError(
+                    "Failed to delete file from storage",
+                );
+            }
+
+            // 3. Delete from database
+            const deletedTransfer = await prisma.transfer.delete({
+                where: { id },
+                select: { id: true }
+            });
+
+            // 4. Return success response
+            revalidatePath("/workspace/transfer")
+            return {
+                success: true,
+                message: "Transfer and associated files have been deleted successfully",
+                data: {
+                    id: deletedTransfer.id
+                }
+            };
+        } catch (error) {
+            if (error instanceof AppError) {
+                throw error;
+            }
+            throw new Error("An internal server error occurred. Please try again later.");
+        }
+    });

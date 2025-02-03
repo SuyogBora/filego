@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import RootProviders from "./root-providers";
-
 const poppins = Poppins({
   variable: "--font-geist-sans",
   subsets: ["latin"],

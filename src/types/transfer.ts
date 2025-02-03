@@ -1,6 +1,6 @@
 import { TransferModeType } from "@/lib/constants";
 import { AddTransferLogSchema, TransferFormSchema } from "@/lib/schema-validations/transfer";
-import { Prisma } from "@prisma/client";
+import { Prisma, Transfer } from "@prisma/client";
 import { z } from "zod";
 
 export type TransferFormValue= z.infer<typeof TransferFormSchema>
@@ -18,7 +18,7 @@ export interface ITransferInfo {
   file_size: number;
   file_type: string;
   total_files: number;
-  expiration_date?: Date;
+  expiration_date: Date;
   max_downloads?: number;
   transfer_start_time: Date,
   transfer_url?:string,
@@ -64,4 +64,66 @@ export function getTransferLogDataSelect() {
       }
     }
   } satisfies Prisma.TransferSelect;
+}
+
+
+
+// Define a type for each action separately
+export interface DeleteAction {
+    type: 'delete';
+    values: { transferId: string;};
+}
+
+export interface QrAction {
+    type: 'qr';
+    values: { transferId: string; transfer: Transfer };
+}
+
+export interface DetailsAction {
+    type: 'details';
+    values: { transfer: Transfer };
+}
+
+export interface AnalyticsAction {
+    type: 'analytics';
+    values: { transferId: string; transfer: Transfer; data?: any };
+}
+
+export interface CopyAction {
+    type: 'copy';
+    values: { url: string; transfer: Transfer };
+}
+
+// Union type of all actions
+export type TransferAction = DeleteAction | QrAction | DetailsAction | AnalyticsAction | CopyAction;
+export type DialogType = TransferAction['type'];
+
+// Type for the action handler
+export type ActionHandler = (action: TransferAction) => void;
+
+
+
+export interface QueryParams {
+  page: number
+  limit: number
+  q?: string,
+  mode?: string[] | []
+  dateFrom: Date | null
+  dateTo: Date | null
+  // sortBy: string
+  // sortOrder: "asc" | "desc"
+}
+
+export interface ResponseMeta {
+  total: number
+  totalPages: number
+  currentPage: number
+  perPage: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+}
+
+export interface TransferResponse {
+  data: any[] // Replace 'any' with your Transfer type
+  meta: ResponseMeta
 }

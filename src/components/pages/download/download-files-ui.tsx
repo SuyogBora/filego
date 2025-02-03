@@ -15,13 +15,18 @@ import { FC, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useServerAction } from "zsa-react";
 
+type SanitizedTransfer = Omit<ITransfer, 'file_password' | 'file_storage_key'> & {
+    file_password?: string;
+    file_storage_key?: string;
+  };
+
 interface DownloadTransferFilesUIProps {
-    transferLog: ITransfer;
+    transferLog: SanitizedTransfer;
 }
 
 const DownloadTransferFilesUI: FC<DownloadTransferFilesUIProps> = ({ transferLog }) => {
     const [isPasswordEnabled, setIsPasswordEnabled] = useState<boolean>(transferLog.file_is_password_enabled);
-    const [fileStorageKey, setFileStorageKey] = useState<string>(transferLog.file_storage_key);
+    const [fileStorageKey, setFileStorageKey] = useState<string | undefined>(transferLog.file_storage_key);
     const [downloadURL, setDownloadURL] = useState<string | null>(null);
     const { isPending, execute: verifyPasswordExecute } = useServerAction(verifyTransferPasswordAction);
     const { toast } = useToast();

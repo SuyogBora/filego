@@ -54,8 +54,8 @@ export const AddTransferLogSchema = z.object({
     user_id: z.string().optional(),
     total_files: z.number().default(0),
     max_downloads: z.number().nullable().default(-1),
-    expiration_date: z.date().optional(),
-    transfer_display_name: z.string({required_error:"Transfer Display Name Required"}).min(1,{message:"Transfer Display Name Required"}),
+    expiration_date: z.date(),
+    transfer_display_name: z.string({ required_error: "Transfer Display Name Required" }).min(1, { message: "Transfer Display Name Required" }),
 }).superRefine(validateTransferData);
 
 
@@ -75,9 +75,9 @@ export const UploadPresignedUrlSchema = z.object({
 export const DownloadPresignedUrlSchema = z.object({
     file_storage_key: z.string(),
     file_type: z.string(),
-    file_extension:  z.string(),
-    total_files:  z.number(),
-    transfer_display_name:z.string()
+    file_extension: z.string(),
+    total_files: z.number(),
+    transfer_display_name: z.string()
 })
 
 export const PreSignedUrlResponseSchema = z.object({
@@ -87,7 +87,22 @@ export const PreSignedUrlResponseSchema = z.object({
     })
 })
 
-export const UpdateTransferMatricsSchema = z.object({
-      fileSize:z.number(),
+export const UpdateTransferMetricsSchema = z.object({
+    fileSize: z.number().optional(),
+    action: z.enum(["fileUploaded", "fileDeleted"]),
 })
 
+export const DeleteTransferLogSchema = z.object({
+    id: z.string({
+        required_error: "Transfer ID is required"
+    }).min(1, {
+        message: "Transfer ID is required"
+    })
+});
+
+export const DeleteTransferLogResponseSchema = z.object({
+    ...baseResponseSchemaObj,
+    data: z.object({
+        id: z.string()
+    })
+});

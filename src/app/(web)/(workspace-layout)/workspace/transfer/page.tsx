@@ -1,25 +1,28 @@
 import PageWrapper from "@/components/common/page-wrapper"
 import { TransferListFallback } from "@/components/loading-states/transfers-lis-faallback"
 import { DynamicTransfersWithSorting } from "@/components/pages/workspace/transfer/dynamic-transfers-with-sort"
-import TransfersFilter from "@/components/pages/workspace/transfer/transfers-filter"
+import { TransfersFilter } from "@/components/pages/workspace/transfer/transfers-filter"
 import { auth } from "@/lib/auth/auth"
+import { transfersMetadata } from "@/lib/metadata"
 import { getAllTransfers } from "@/lib/queries/transfer"
 import { searchParamsCache } from "@/lib/searchParams"
+import { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
 
-export default async function TransfersPage({
-  searchParams,
-}: {
+interface TransfersPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}) {
-  const session = await auth()
-  if (!session || !session.user.id) redirect("/")
-  const userId = session.user.id
+}
+export const metadata: Metadata = transfersMetadata
 
-  const searchParamsResolved = await searchParams;
-  const { q, limit,page,mode,dateFrom,dateTo } = searchParamsCache.parse(searchParamsResolved);
-  const transfersPromise = getAllTransfers(userId, {
+export default async function TransfersPage({ searchParams }: TransfersPageProps) {
+  const session = await auth()
+  if (!session?.user.id) redirect("/")
+
+  const searchParamsResolved = await searchParams
+  const { q, limit, page, mode, dateFrom, dateTo } = searchParamsCache.parse(searchParamsResolved)
+
+  const transfersPromise = getAllTransfers(session.user.id, {
     page,
     limit,
     q,
@@ -37,4 +40,3 @@ export default async function TransfersPage({
     </PageWrapper>
   )
 }
-

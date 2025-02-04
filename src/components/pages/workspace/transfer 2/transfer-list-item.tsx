@@ -46,6 +46,8 @@ const TransferListItem: FC<TransferListItemProps> = ({ transfer, onAction }) => 
                     <p className="text-[11px] text-muted-foreground mb-1">
                         {transfer.transfer_message}
                     </p>
+
+                    {/* File Metadata */}
                     <div>
                         <ul className="flex items-center gap-2">
                             <MetadataItem
@@ -55,6 +57,11 @@ const TransferListItem: FC<TransferListItemProps> = ({ transfer, onAction }) => 
                             <MetadataItem
                                 label="Type"
                                 value={transfer.file_type}
+                            />
+                            <MetadataItem
+                                label="Expire On"
+                                value={format(transfer.expiration_date, "MMM dd, yyyy 'at' HH:mm")}
+                                className="text-red-600"
                             />
                         </ul>
                     </div>

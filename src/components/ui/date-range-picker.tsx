@@ -1,27 +1,29 @@
 "use client"
 
-import * as React from "react"
-import { addDays, format } from "date-fns"
+import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
+import * as React from "react"
 import type { DateRange } from "react-day-picker"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import TinyLoader from "../common/tiny-loader"
 
 interface DatePickerWithRangeProps extends React.HTMLAttributes<HTMLDivElement> {
   date?: DateRange
-  onDateChange?: (date: DateRange | undefined) => void
+  onDateChange?: (date: DateRange | undefined) => void,
+  isTransitionPending?:boolean
 }
 
-export function DatePickerWithRange({ className, date, onDateChange }: DatePickerWithRangeProps) {
+export function DatePickerWithRange({ className, date, onDateChange,isTransitionPending }: DatePickerWithRangeProps) {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
-    date 
+    date
   )
 
   React.useEffect(() => {
-      setDateRange(date)
+    setDateRange(date)
   }, [date])
 
   const handleDateSelect = (newDate: DateRange | undefined) => {
@@ -36,9 +38,11 @@ export function DatePickerWithRange({ className, date, onDateChange }: DatePicke
           <Button
             id="date"
             variant={"outline"}
-            className={cn("w-[300px] justify-start text-left font-normal", !dateRange && "text-muted-foreground")}
+            className={cn("w-[250px] justify-start px-3 text-left gap-2 font-semibold hover:bg-background text-xs", !dateRange && "text-muted-foreground")}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            {
+              !isTransitionPending ? <CalendarIcon className="h-4 w-4" /> : <TinyLoader className='w-5 h-5 text-primary' />
+            }
             {dateRange?.from ? (
               dateRange.to ? (
                 <>

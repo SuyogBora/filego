@@ -23,12 +23,11 @@ export const siteConfig = {
   export const downloadMetadata: Metadata = {
     title: "Download File - FileGo",
     description: "Download shared files securely from FileGo. Password-protected file transfers and secure payment processing.",
-    
   }
   
   // Dashboard page metadata
-  export const dashboardMetadata: Metadata = {
-    title: "Dashboard - FileGo",
+  export const workSpaceMetadata: Metadata = {
+    title: "Workspace - FileGo",
     description: "Manage your uploaded files, track downloads, and monitor earnings with FileGo's comprehensive dashboard.",
    
   }
@@ -57,4 +56,10 @@ export const loginMetadata: Metadata = {
   export const resetPasswordMetadata: Metadata = {
     title: `Reset Password - ${siteConfig.name}`,
     description: "Set a new password for your FileGo account. Ensure your account security with a strong password.",
+  }
+
+  
+  export const transfersMetadata: Metadata = {
+    title: "Transfers - FileGo",
+    description: "View, manage, and analyze your file transfers. Filter, delete, and gain insights into your sharing history on FileGo.",
   }

@@ -33,7 +33,7 @@ const TransferModeToggle: FC<TransferModeToggleProps> = ({ onToggleValue, values
   }
 
   return (
-    <div className="flex items-center gap-2 p-2.5 rounded-md bg-sidebar">
+    <div className="flex items-center gap-2 p-2.5 rounded-md bg-background border border-border">
       {items.map((item) => (
         <div className="flex items-center gap-2" key={item.id}>
           <Checkbox 

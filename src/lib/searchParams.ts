@@ -4,7 +4,7 @@ export const searchParams = {
   q: parseAsString.withDefault('').withOptions({shallow:false,throttleMs:300}),
   mode: parseAsArrayOf(parseAsString).withDefault([]).withOptions({shallow:false}),
   page: parseAsInteger.withDefault(1).withOptions({shallow:false}),
-  limit: parseAsInteger.withDefault(1).withOptions({shallow:false}),
+  limit: parseAsInteger.withDefault(10).withOptions({shallow:false}),
   dateFrom:parseAsIsoDate,
   dateTo:parseAsIsoDate
 };

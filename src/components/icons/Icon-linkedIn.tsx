@@ -7,7 +7,7 @@ interface IconLinkedInProps extends LucideProps {
 
 const IconLinkedIn: FC<IconLinkedInProps> = ({ width = "24px", height = "24px", ...props }) => {
     return (
-        <svg {...props} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg {...props} width={width} height={height} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clipRule="url(#clip0_4_2)">
                 <path fillRule="evenodd" clipRule="evenodd" d="M36 48H12C8.8174 48 5.76516 46.7357 3.51472 44.4853C1.26428 42.2348 0 39.1826 0 36V12C0 8.8174 1.26428 5.76516 3.51472 3.51472C5.76516 1.26428 8.8174 0 12 0L36 0C39.1826 0 42.2348 1.26428 44.4853 3.51472C46.7357 5.76516 48 8.8174 48 12V36C48 39.1826 46.7357 42.2348 44.4853 44.4853C42.2348 46.7357 39.1826 48 36 48Z" fill="#2864B4" />
                 <path fillRule="evenodd" clipRule="evenodd" d="M22.5 13.5H36C37.7319 13.5022 39.3983 12.8386 40.6546 11.6465C41.911 10.4544 42.661 8.82504 42.7496 7.09544C42.8383 5.36583 42.2587 3.66833 41.1308 2.35407C40.0029 1.03982 38.413 0.209364 36.69 0.0345C36.4605 0.02175 36.2333 0 36 0H12C8.8174 0 5.76516 1.26428 3.51472 3.51472C1.26428 5.76516 0 8.8174 0 12L0 36C0 30.0326 2.37053 24.3097 6.5901 20.0901C10.8097 15.8705 16.5326 13.5 22.5 13.5Z" fill="#417DCD" />

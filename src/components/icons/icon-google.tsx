@@ -5,7 +5,7 @@ interface IconGoogleProps extends LucideProps{
 }
 const IconGoogle: FC<IconGoogleProps> = ({width="24px",height="24px",...props}) => {
     return (
-        <svg {...props} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg {...props} width={width} height={height} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clipPath="url(#clip0_2_2)">
                 <path d="M11.25 24C11.25 21.6218 11.9052 19.3941 13.0435 17.4865V9.39516H4.95216C1.74075 13.5659 0 18.6489 0 24C0 29.3511 1.74075 34.4341 4.95216 38.6048H13.0435V30.5135C11.9052 28.6059 11.25 26.3782 11.25 24Z" fill="#FBBD00" />
                 <path d="M24 36.75L18.375 42.375L24 48C29.3512 48 34.4341 46.2593 38.6048 43.0478V34.9651H30.5221C28.5979 36.1075 26.3607 36.75 24 36.75Z" fill="#0F9D58" />

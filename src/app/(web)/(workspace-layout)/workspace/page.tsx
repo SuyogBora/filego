@@ -3,11 +3,12 @@ import ScrollableWrapper from '@/components/common/scrollable-wrapper'
 import KPISectionFallback from '@/components/loading-states/kpi-section-fallback'
 import PrepareUpload from '@/components/pages/upload/prepare-upload'
 import KPISection from '@/components/pages/workspace/kpi-section'
+import { workSpaceMetadata } from '@/lib/metadata'
+import { Metadata } from 'next'
 import { FC, Suspense } from 'react'
 
-interface WorkspaceProps {
-
-}
+interface WorkspaceProps {}
+export const metadata: Metadata = workSpaceMetadata
 
 const Workspace: FC<WorkspaceProps> = ({ }) => {
   return (

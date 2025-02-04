@@ -7,6 +7,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import type { FC } from "react"
 import { KPICard } from "./kpi-card"
+import KPISectionFallback from "@/components/loading-states/kpi-section-fallback"
 
 export const KPISection: FC = async () => {
   const session = await auth()
